@@ -9,10 +9,11 @@ public interface ImageInput {
     void open() throws InputImageGenerationException;
 
     BufferedImage readImage()
-        throws InputImageGenerationException;
+            throws InputImageGenerationException;
 
     /**
      * Provide a sample of the input. This is required to allow the client to initialize the converters ahead of time
+     *
      * @return A sample build with the format provided by the input
      */
     BufferedImage getSampleImage() throws InputImageGenerationException;

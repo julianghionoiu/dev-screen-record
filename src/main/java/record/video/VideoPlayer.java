@@ -9,6 +9,8 @@ import record.time.TimeSource;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -79,16 +81,27 @@ public class VideoPlayer {
         streamTimebase = videoStream.getTimeBase();
         System.out.println("streamTimebase = " + streamTimebase);
         long streamVideoDuration = videoStream.getDuration();
-        System.out.println("streamVideoDuration: "+streamVideoDuration);
+        System.out.println("streamVideoDuration: " + streamVideoDuration);
 
         // Set units for the system time, which will be in nanoseconds.
         systemTimeBase = Rational.make(1, 1000000000);
         System.out.println("systemTimeBase = " + systemTimeBase);
         long systemVideoDuration = systemTimeBase.rescale(streamVideoDuration, streamTimebase);
-        System.out.println("systemVideoDuration: "+systemVideoDuration);
+        System.out.println("systemVideoDuration: " + systemVideoDuration);
 
         // Reset time counters
         previousStreamEndTime = -1;
+    }
+
+    public Duration getDuration() {
+        Rational systemTimeBase = Rational.make(1);
+        long durationInSec = systemTimeBase
+                .rescale(videoStream.getDuration(), videoStream.getTimeBase());
+        return Duration.of(durationInSec, ChronoUnit.SECONDS);
+    }
+
+    public double getFrameRate() {
+        return videoStream.getFrameRate().getValue();
     }
 
     public int getWidth() {
@@ -142,7 +155,7 @@ public class VideoPlayer {
 
         // Calculate the time BEFORE we start playing.
         long streamStartTime;
-        if (previousStreamEndTime > -1 ) {
+        if (previousStreamEndTime > -1) {
             streamStartTime = previousStreamEndTime;
         } else {
             streamStartTime = videoStream.getStartTime();
@@ -182,7 +195,7 @@ public class VideoPlayer {
         do {
             videoStream.getDecoder().decode(picture, null, 0);
             if (picture.isComplete()) {
-                image = displayVideoAtCorrectTime( streamStartTime, picture, converter,
+                image = displayVideoAtCorrectTime(streamStartTime, picture, converter,
                         image, imageOutput, systemStartTime, systemTimeBase, streamTimebase);
                 previousStreamEndTime = picture.getTimeStamp();
             }

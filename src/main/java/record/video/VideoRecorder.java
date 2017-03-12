@@ -11,6 +11,7 @@ import record.time.TimeSource;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 public class VideoRecorder {
@@ -32,7 +33,7 @@ public class VideoRecorder {
 
     //TODO Sort out exceptions
     public void open(String filename, int snapsPerSecond, int timeSpeedUpFactor)
-        throws AWTException, IOException, InterruptedException, InputImageGenerationException {
+            throws AWTException, IOException, InterruptedException, InputImageGenerationException {
         /*
            With videos it is all about timing.
            We need to keep two frames of reference, one for the input and one for the output (video)
@@ -70,8 +71,8 @@ public class VideoRecorder {
         muxer.open(null, null);
     }
 
-    public void record(int duration)
-        throws AWTException, InterruptedException, IOException, InputImageGenerationException {
+    public void record(Duration duration)
+            throws AWTException, InterruptedException, IOException, InputImageGenerationException {
 
         /*
           Care must be taken so that the picture is encoded using the same format as Encoder.
@@ -91,7 +92,7 @@ public class VideoRecorder {
           This packet and the picture will be reset whenever we have new data.
          */
         final MediaPacket packet = MediaPacket.make();
-        double totalNumberOfFrames = inputFrameRate.rescale(duration, Rational.make(1));
+        double totalNumberOfFrames = inputFrameRate.rescale(duration.getSeconds(), Rational.make(1));
         for (long frameIndex = 0; frameIndex < totalNumberOfFrames; frameIndex++) {
             long timestampBeforeProcessing = timeSource.currentTimeNano();
 

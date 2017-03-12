@@ -4,7 +4,6 @@ import record.image.output.OutputToInMemoryBuffer;
 import record.time.TimeSource;
 import record.video.VideoPlayer;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
@@ -25,23 +24,23 @@ public class InputFromVideoFile implements ImageInput {
 
     @Override
     public void open() throws InputImageGenerationException {
-      try {
-        videoPlayer.open(videoUrl);
-        systemStartTime = timeSource.currentTimeNano();
-      } catch (IOException | InterruptedException e) {
-        throw new InputImageGenerationException(e);
-      }
+        try {
+            videoPlayer.open(videoUrl);
+            systemStartTime = timeSource.currentTimeNano();
+        } catch (IOException | InterruptedException e) {
+            throw new InputImageGenerationException(e);
+        }
     }
 
     @Override
     public BufferedImage readImage() throws InputImageGenerationException {
-      try {
-        long currentTime = timeSource.currentTimeNano();
-        videoPlayer.seekTo(currentTime - systemStartTime, TimeUnit.NANOSECONDS);
-        return inMemoryBuffer.getCurrentImage();
-      } catch (IOException | InterruptedException e) {
-        throw new InputImageGenerationException(e);
-      }
+        try {
+            long currentTime = timeSource.currentTimeNano();
+            videoPlayer.seekTo(currentTime - systemStartTime, TimeUnit.NANOSECONDS);
+            return inMemoryBuffer.getCurrentImage();
+        } catch (IOException | InterruptedException e) {
+            throw new InputImageGenerationException(e);
+        }
     }
 
     @Override
