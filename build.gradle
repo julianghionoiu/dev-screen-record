@@ -1,0 +1,17 @@
+group 'ro'
+
+version '1.0-SNAPSHOT'
+apply plugin: 'java'
+
+//noinspection GroovyUnusedAssignment
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile 'io.humble:humble-video-all:0.2.1'
+
+    testCompile 'junit:junit:4.11'
+}
