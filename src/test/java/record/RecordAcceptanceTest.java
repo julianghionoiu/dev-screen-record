@@ -2,6 +2,8 @@ package record;
 
 import org.junit.Ignore;
 import org.junit.Test;
+import record.image.input.ImageInput;
+import record.image.input.InputFromStreamOfBarcodes;
 import record.image.input.InputFromVideoFile;
 import record.image.input.InputFromScreen;
 import record.time.FakeTimeSource;
@@ -43,24 +45,52 @@ public class RecordAcceptanceTest {
      *      - maybe by generating and reading barcodes ? https://github.com/zxing/zxing
      */
     @Test
-    public void can_record_video() throws Exception {
+    public void can_record_video_at_different_frame_rate() throws Exception {
         TimeSource timeSource = new FakeTimeSource();
-        InputFromVideoFile imageInput = new InputFromVideoFile("src/test/resources/t_reference_recording.mp4", timeSource);
+        ImageInput imageInput = new InputFromStreamOfBarcodes(timeSource);
         VideoRecorder videoRecorder = new VideoRecorder(imageInput, timeSource);
 
-        videoRecorder.open("text.mp4", 20, 1);
+        videoRecorder.open("./build/text.mp4", 20, 1);
         videoRecorder.record(30);
 
         videoRecorder.close();
     }
-
 
     /**
      * Size: Given known input containing movement, the size should be less than X
      */
     @Test
     @Ignore("Not implemented")
+    public void can_record_at_different_speed() throws Exception {
+    }
+
+
+
+
+  /**
+     * Size: Given known input containing movement, the size should be less than X
+     */
+    @Test
+    @Ignore("Not implemented")
     public void size_should_be_kept_small_while_retaining_quality() throws Exception {
+      TimeSource timeSource = new FakeTimeSource();
+      InputFromVideoFile imageInput = new InputFromVideoFile("src/test/resources/t_reference_recording.mp4", timeSource);
+      VideoRecorder videoRecorder = new VideoRecorder(imageInput, timeSource);
+
+      videoRecorder.open("./build/text.mp4", 20, 1);
+      videoRecorder.record(30);
+
+      videoRecorder.close();
+    }
+
+
+    /**
+     * Aspect ratio and scaling:
+     * TODO: Check VIMEO requirements
+     */
+    @Test
+    @Ignore("Not implemented")
+    public void large_screen_size_should_be_scaled_down() throws Exception {
 
     }
 

@@ -4,6 +4,7 @@ import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
 import record.image.input.ImageInput;
+import record.image.input.InputImageGenerationException;
 import record.time.SystemTimeSource;
 import record.time.TimeSource;
 
@@ -31,7 +32,7 @@ public class VideoRecorder {
 
     //TODO Sort out exceptions
     public void open(String filename, int snapsPerSecond, int timeSpeedUpFactor)
-            throws AWTException, IOException, InterruptedException {
+        throws AWTException, IOException, InterruptedException, InputImageGenerationException {
         /*
            With videos it is all about timing.
            We need to keep two frames of reference, one for the input and one for the output (video)
@@ -70,7 +71,7 @@ public class VideoRecorder {
     }
 
     public void record(int duration)
-            throws AWTException, InterruptedException, IOException {
+        throws AWTException, InterruptedException, IOException, InputImageGenerationException {
 
         /*
           Care must be taken so that the picture is encoded using the same format as Encoder.

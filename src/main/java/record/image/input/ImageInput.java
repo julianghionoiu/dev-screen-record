@@ -1,21 +1,21 @@
 package record.image.input;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 public interface ImageInput {
 
     //TODO Sort out the exceptions
-    void open() throws AWTException, IOException, InterruptedException;
+    void open() throws InputImageGenerationException;
 
-    BufferedImage readImage() throws IOException, InterruptedException;
+    BufferedImage readImage()
+        throws InputImageGenerationException;
 
     /**
      * Provide a sample of the input. This is required to allow the client to initialize the converters ahead of time
      * @return A sample build with the format provided by the input
      */
-    BufferedImage getSampleImage();
+    BufferedImage getSampleImage() throws InputImageGenerationException;
 
     int getWidth();
 

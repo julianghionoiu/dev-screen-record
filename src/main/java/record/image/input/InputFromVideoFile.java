@@ -24,16 +24,24 @@ public class InputFromVideoFile implements ImageInput {
     }
 
     @Override
-    public void open() throws AWTException, IOException, InterruptedException {
+    public void open() throws InputImageGenerationException {
+      try {
         videoPlayer.open(videoUrl);
         systemStartTime = timeSource.currentTimeNano();
+      } catch (IOException | InterruptedException e) {
+        throw new InputImageGenerationException(e);
+      }
     }
 
     @Override
-    public BufferedImage readImage() throws IOException, InterruptedException {
+    public BufferedImage readImage() throws InputImageGenerationException {
+      try {
         long currentTime = timeSource.currentTimeNano();
         videoPlayer.seekTo(currentTime - systemStartTime, TimeUnit.NANOSECONDS);
         return inMemoryBuffer.getCurrentImage();
+      } catch (IOException | InterruptedException e) {
+        throw new InputImageGenerationException(e);
+      }
     }
 
     @Override

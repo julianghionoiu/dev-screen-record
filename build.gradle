@@ -12,6 +12,8 @@ repositories {
 
 dependencies {
     compile 'io.humble:humble-video-all:0.2.1'
+    compile 'com.google.zxing:core:3.3.0'
+
 
     testCompile 'junit:junit:4.11'
 }

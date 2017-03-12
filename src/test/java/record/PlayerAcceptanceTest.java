@@ -14,7 +14,7 @@ public class PlayerAcceptanceTest {
     public void play_recorded_video() throws Exception {
         VideoPlayer videoPlayer = new VideoPlayer(new OutputToScreen());
 
-        videoPlayer.open("text.mp4");
+        videoPlayer.open("./build/text.mp4");
         videoPlayer.seekTo(2, TimeUnit.SECONDS);
         videoPlayer.seekTo(5, TimeUnit.SECONDS);
         videoPlayer.play();
