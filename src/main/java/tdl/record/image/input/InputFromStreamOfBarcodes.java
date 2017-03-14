@@ -1,11 +1,11 @@
-package record.image.input;
+package tdl.record.image.input;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
-import record.time.TimeSource;
+import tdl.record.time.TimeSource;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

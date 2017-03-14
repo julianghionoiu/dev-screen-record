@@ -1,12 +1,12 @@
-package record.video;
+package tdl.record.video;
 
 import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
-import record.image.input.ImageInput;
-import record.image.input.InputImageGenerationException;
-import record.time.SystemTimeSource;
-import record.time.TimeSource;
+import tdl.record.image.input.ImageInput;
+import tdl.record.image.input.InputImageGenerationException;
+import tdl.record.time.SystemTimeSource;
+import tdl.record.time.TimeSource;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

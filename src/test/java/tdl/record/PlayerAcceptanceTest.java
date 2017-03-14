@@ -1,9 +1,9 @@
-package record;
+package tdl.record;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import record.image.output.OutputToScreen;
-import record.video.VideoPlayer;
+import tdl.record.image.output.OutputToScreen;
+import tdl.record.video.VideoPlayer;
 
 import java.util.concurrent.TimeUnit;
 

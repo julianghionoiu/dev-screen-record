@@ -1,8 +1,8 @@
-package record.image.input;
+package tdl.record.image.input;
 
-import record.image.output.OutputToInMemoryBuffer;
-import record.time.TimeSource;
-import record.video.VideoPlayer;
+import tdl.record.image.output.OutputToInMemoryBuffer;
+import tdl.record.time.TimeSource;
+import tdl.record.video.VideoPlayer;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;

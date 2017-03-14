@@ -1,4 +1,4 @@
-package record.image.output;
+package tdl.record.image.output;
 
 import java.awt.image.BufferedImage;
 

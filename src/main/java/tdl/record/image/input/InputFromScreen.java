@@ -1,6 +1,6 @@
-package record.image.input;
+package tdl.record.image.input;
 
-import utils.ImageUtils;
+import tdl.record.utils.ImageUtils;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;

@@ -1,4 +1,4 @@
-package record.image.input;
+package tdl.record.image.input;
 
 public class InputImageGenerationException extends Exception {
 

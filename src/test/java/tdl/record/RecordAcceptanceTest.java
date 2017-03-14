@@ -1,4 +1,4 @@
-package record;
+package tdl.record;
 
 import com.google.zxing.BarcodeFormat;
 import org.hamcrest.Description;
@@ -6,15 +6,15 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Ignore;
 import org.junit.Test;
-import record.image.input.ImageInput;
-import record.image.input.InputFromScreen;
-import record.image.input.InputFromStreamOfBarcodes;
-import record.image.input.InputFromVideoFile;
-import record.image.output.OutputToBarcodeReader;
-import record.time.FakeTimeSource;
-import record.time.TimeSource;
-import record.video.VideoPlayer;
-import record.video.VideoRecorder;
+import tdl.record.image.input.ImageInput;
+import tdl.record.image.input.InputFromScreen;
+import tdl.record.image.input.InputFromStreamOfBarcodes;
+import tdl.record.image.input.InputFromVideoFile;
+import tdl.record.image.output.OutputToBarcodeReader;
+import tdl.record.time.FakeTimeSource;
+import tdl.record.time.TimeSource;
+import tdl.record.video.VideoPlayer;
+import tdl.record.video.VideoRecorder;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;

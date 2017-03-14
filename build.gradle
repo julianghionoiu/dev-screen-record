@@ -39,7 +39,7 @@ apply plugin: 'com.github.kt3k.coveralls'
 
 cobertura {
     coverageFormats = ['html', 'xml']
-    coverageIncludes = ['.*tdl.client.*']
+    coverageIncludes = ['.*tdl.record.*']
     coverageExcludes = ['.*tdl.examples.*']
     coverageIgnores = ['.*org.slf4j.Logger.*']
 }

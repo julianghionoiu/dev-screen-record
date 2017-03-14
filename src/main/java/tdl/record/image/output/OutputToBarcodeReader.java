@@ -1,8 +1,8 @@
-package record.image.output;
+package tdl.record.image.output;
 
 import com.google.zxing.*;
 import com.google.zxing.common.HybridBinarizer;
-import record.time.TimeSource;
+import tdl.record.time.TimeSource;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
