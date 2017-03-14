@@ -1,5 +1,9 @@
 package record;
 
+import com.google.zxing.BarcodeFormat;
+import org.hamcrest.Description;
+import org.hamcrest.Matcher;
+import org.hamcrest.TypeSafeMatcher;
 import org.junit.Ignore;
 import org.junit.Test;
 import record.image.input.ImageInput;
@@ -14,7 +18,11 @@ import record.video.VideoRecorder;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
+import static java.lang.Math.abs;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.closeTo;
@@ -55,22 +63,22 @@ public class RecordAcceptanceTest {
      */
     @Test
     public void can_record_video_at_specified_frame_rate_and_speed() throws Exception {
-        String outputFile = "./build/text.mp4";
+        String outputFile = "./build/barcode_speed_up.mp4";
         TimeSource recordTimeSource = new FakeTimeSource();
-        ImageInput imageInput = new InputFromStreamOfBarcodes(300, 150, recordTimeSource);
+        ImageInput imageInput = new InputFromStreamOfBarcodes(BarcodeFormat.CODE_39, 300, 150, recordTimeSource);
         VideoRecorder videoRecorder = new VideoRecorder(imageInput, recordTimeSource);
 
         // Capture video
-        videoRecorder.open(outputFile, 20, 1);
-        videoRecorder.record(Duration.of(10, ChronoUnit.SECONDS));
+        videoRecorder.open(outputFile, 5, 4);
+        videoRecorder.record(Duration.of(12, ChronoUnit.SECONDS));
         videoRecorder.close();
 
         // Read recorded video parameters
         TimeSource replayTimeSource = new FakeTimeSource();
-        OutputToBarcodeReader barcodeReader = new OutputToBarcodeReader(replayTimeSource);
+        OutputToBarcodeReader barcodeReader = new OutputToBarcodeReader(replayTimeSource, BarcodeFormat.CODE_39);
         VideoPlayer videoPlayer = new VideoPlayer(barcodeReader, replayTimeSource);
         videoPlayer.open(outputFile);
-        assertThat(videoPlayer.getDuration(), is(Duration.of(10, ChronoUnit.SECONDS)));
+        assertThat("Video duration is not as expected", videoPlayer.getDuration(), is(Duration.of(3, ChronoUnit.SECONDS)));
         assertThat(videoPlayer.getFrameRate(), is(closeTo(20, 0.01)));
         assertThat(videoPlayer.getWidth(), is(300));
         assertThat(videoPlayer.getHeight(), is(150));
@@ -79,11 +87,11 @@ public class RecordAcceptanceTest {
         videoPlayer.play();
         videoPlayer.close();
 
-        //TODO Assert that the barcodes are consistent with the speed rate
-        //noinspection ResultOfMethodCallIgnored
-        barcodeReader.getDecodedBarcodes();
+        // Assert on timestamps
+        List<OutputToBarcodeReader.TimestampPair> decodedBarcodes = barcodeReader.getDecodedBarcodes();
+        assertThat(decodedBarcodes.isEmpty(), is(false));
+        assertThat(decodedBarcodes, areConsistentWith(4));
     }
-
 
     /**
      * Size: Given known input containing movement, the size should be less than X
@@ -114,6 +122,7 @@ public class RecordAcceptanceTest {
         //Assert that frames are smaller
     }
 
+
     /**
      * Packets produced: The video should be broken down in discrete packets to make upload easier. (write every X min)
      */
@@ -140,6 +149,47 @@ public class RecordAcceptanceTest {
     @Ignore("Not implemented")
     public void the_frames_should_contain_a_watermark_with_the_speedup() throws Exception {
 
+    }
+
+    //~~~~~~~~~~~~~ Helpers
+
+    private Matcher<List<OutputToBarcodeReader.TimestampPair>> areConsistentWith(
+            @SuppressWarnings("SameParameterValue") int timeSpeedUpFactor) {
+        return new TypeSafeMatcher<List<OutputToBarcodeReader.TimestampPair>>() {
+            OutputToBarcodeReader.TimestampPair firstError;
+
+            @Override
+            protected boolean matchesSafely(List<OutputToBarcodeReader.TimestampPair> timestamps) {
+                Predicate<OutputToBarcodeReader.TimestampPair> timestampNotConsistentWithSpeed = timestampPair -> {
+                    double maximumDrift = 1000*1000;
+                    return abs((timestampPair.systemTimestamp * timeSpeedUpFactor) - timestampPair.barcodeTimestamp) > maximumDrift;
+                };
+                Optional<OutputToBarcodeReader.TimestampPair> first = timestamps.stream()
+                        .filter(timestampNotConsistentWithSpeed)
+                        .findFirst();
+
+                if (first.isPresent()) {
+                    firstError = first.get();
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+
+            @Override
+            protected void describeMismatchSafely(List<OutputToBarcodeReader.TimestampPair> timestamps,
+                                                  Description mismatchDescription) {
+                mismatchDescription.appendText("timestamps have drifted").appendText("\n")
+                        .appendText("For system timestamp ").appendValue(firstError.systemTimestamp)
+                        .appendText(" expected barcode timestamp ").appendValue(firstError.systemTimestamp * timeSpeedUpFactor)
+                        .appendText(" got ").appendValue(firstError.barcodeTimestamp);
+            }
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("that timestamps are consistent with speedup factor " + timeSpeedUpFactor);
+            }
+        };
     }
 
 }

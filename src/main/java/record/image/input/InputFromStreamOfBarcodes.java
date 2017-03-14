@@ -15,17 +15,19 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public class InputFromStreamOfBarcodes implements ImageInput {
+    private final BarcodeFormat barcodeFormat;
     private final int width;
     private final int height;
     private final BarcodeImageRaster barcodeImageRaster;
     private final TimeSource timeSource;
     private long systemStartTime;
 
-    public InputFromStreamOfBarcodes(int width, int height, TimeSource timeSource) {
+    public InputFromStreamOfBarcodes(BarcodeFormat barcodeFormat, int width, int height, TimeSource timeSource) {
         this.width = width;
         this.height = height;
         this.barcodeImageRaster = new BarcodeImageRaster(width, height, this.height / 3);
         this.timeSource = timeSource;
+        this.barcodeFormat = barcodeFormat;
     }
 
     @Override
@@ -76,7 +78,7 @@ public class InputFromStreamOfBarcodes implements ImageInput {
         try {
             String barCodeContents = Long.toString(timestamp);
             matrix = new MultiFormatWriter().encode(
-                    barCodeContents, BarcodeFormat.CODE_39, width, height, hints);
+                    barCodeContents, barcodeFormat, width, height, hints);
             long seconds = timeUnit.toSeconds(timestamp);
             long millis = timeUnit.toMillis(timestamp) - TimeUnit.SECONDS.toMillis(seconds);
             String timeAsMillis = String.format("%d.%03d", seconds, millis);
