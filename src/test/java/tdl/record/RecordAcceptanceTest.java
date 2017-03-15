@@ -16,6 +16,8 @@ import tdl.record.time.TimeSource;
 import tdl.record.video.VideoPlayer;
 import tdl.record.video.VideoRecorder;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -26,6 +28,7 @@ import static java.lang.Math.abs;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.greaterThan;
 
 public class RecordAcceptanceTest {
 
@@ -63,13 +66,13 @@ public class RecordAcceptanceTest {
      */
     @Test
     public void can_record_video_at_specified_frame_rate_and_speed() throws Exception {
-        String outputFile = "./build/barcode_speed_up.mp4";
+        String destinationVideo = "build/recording_from_barcode_at_4x.mp4";
         TimeSource recordTimeSource = new FakeTimeSource();
         ImageInput imageInput = new InputFromStreamOfBarcodes(BarcodeFormat.CODE_39, 300, 150, recordTimeSource);
         VideoRecorder videoRecorder = new VideoRecorder(imageInput, recordTimeSource);
 
         // Capture video
-        videoRecorder.open(outputFile, 5, 4);
+        videoRecorder.open(destinationVideo, 5, 4);
         videoRecorder.record(Duration.of(12, ChronoUnit.SECONDS));
         videoRecorder.close();
 
@@ -77,7 +80,7 @@ public class RecordAcceptanceTest {
         TimeSource replayTimeSource = new FakeTimeSource();
         OutputToBarcodeReader barcodeReader = new OutputToBarcodeReader(replayTimeSource, BarcodeFormat.CODE_39);
         VideoPlayer videoPlayer = new VideoPlayer(barcodeReader, replayTimeSource);
-        videoPlayer.open(outputFile);
+        videoPlayer.open(destinationVideo);
         assertThat("Video duration is not as expected", videoPlayer.getDuration(), is(Duration.of(3, ChronoUnit.SECONDS)));
         assertThat(videoPlayer.getFrameRate(), is(closeTo(20, 0.01)));
         assertThat(videoPlayer.getWidth(), is(300));
@@ -97,16 +100,29 @@ public class RecordAcceptanceTest {
      * Size: Given known input containing movement, the size should be less than X
      */
     @Test
-    @Ignore("Not implemented")
     public void size_should_be_kept_small_while_retaining_quality() throws Exception {
+        String referenceVideoFile = "src/test/resources/t_reference_recording.mp4";
+        String destinationVideoFile = "build/recording_from_reference_video.mp4";
         TimeSource timeSource = new FakeTimeSource();
-        InputFromVideoFile imageInput = new InputFromVideoFile("src/test/resources/t_reference_recording.mp4", timeSource);
+        InputFromVideoFile imageInput = new InputFromVideoFile(referenceVideoFile, timeSource);
+
         VideoRecorder videoRecorder = new VideoRecorder(imageInput, timeSource);
-
-        videoRecorder.open("./build/text.mp4", 20, 1);
-        videoRecorder.record(Duration.of(30, ChronoUnit.SECONDS));
-
+        videoRecorder.open(destinationVideoFile, 4, 4);
+        videoRecorder.record(Duration.of(60, ChronoUnit.SECONDS));
         videoRecorder.close();
+
+        // Lock down the destination size
+        long sizeOfReference = Files.size(Paths.get(referenceVideoFile));
+        long sizeOfDestination = Files.size(Paths.get(destinationVideoFile));
+        double compressionFactor = (double) sizeOfReference / (double) sizeOfDestination;
+        System.out.println("compressionFactor = " + compressionFactor);
+        // snap 1/sec = 2.79 comp
+        // snap 2/sec = 2.43 comp
+        // snap 3/sec = 2.22 comp
+        // snap 4/sec = 2.08 comp
+        // snap 5/sec = 1.97 comp
+        // snap 6/sec = 1.91 comp
+        assertThat(compressionFactor, greaterThan(2.08d));
     }
 
 

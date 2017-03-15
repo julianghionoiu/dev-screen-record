@@ -48,8 +48,8 @@ public class VideoRecorder {
         // A muxer is responsible for combining multiple streams (video, audio, subtitle)
         muxer = Muxer.make(filename, null, null);
 
-        // We are using the default format, which right now defaults to CODEC_ID_H264
-        //TODO Read about CODEC_ID_H264 https://sidbala.com/h-264-is-magic/
+        // We are using the default format, which right on OSX defaults to CODEC_ID_H264
+        // WARNING! The coded selection is system dependent and will use JNI to retrieve the local codec
         final MuxerFormat format = muxer.getFormat();
         final Codec codec = Codec.findEncodingCodec(format.getDefaultVideoCodecId());
 
