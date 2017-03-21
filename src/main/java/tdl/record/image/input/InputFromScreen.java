@@ -1,6 +1,6 @@
 package tdl.record.image.input;
 
-import tdl.record.utils.ImageUtils;
+import tdl.record.utils.ImageConversion;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
@@ -31,7 +31,7 @@ public class InputFromScreen implements ImageInput {
     @Override
     public BufferedImage readImage() {
         BufferedImage screenCapture = robot.createScreenCapture(screenBounds);
-        return ImageUtils.convertToType(screenCapture, IMAGE_TYPE);
+        return ImageConversion.convertToType(screenCapture, IMAGE_TYPE);
     }
 
     @Override

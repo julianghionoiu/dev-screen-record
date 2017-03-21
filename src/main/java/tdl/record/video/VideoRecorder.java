@@ -9,6 +9,8 @@ import tdl.record.time.SystemTimeSource;
 import tdl.record.time.TimeSource;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.Duration;

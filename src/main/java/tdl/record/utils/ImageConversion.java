@@ -2,7 +2,7 @@ package tdl.record.utils;
 
 import java.awt.image.BufferedImage;
 
-public class ImageUtils {
+public class ImageConversion {
 
     /**
      * Convert a {@link BufferedImage} of any type, to {@link BufferedImage} of a

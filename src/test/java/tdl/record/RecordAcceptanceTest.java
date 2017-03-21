@@ -6,13 +6,11 @@ import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.Ignore;
 import org.junit.Test;
-import tdl.record.image.input.ImageInput;
-import tdl.record.image.input.InputFromScreen;
-import tdl.record.image.input.InputFromStreamOfBarcodes;
-import tdl.record.image.input.InputFromVideoFile;
+import tdl.record.image.input.*;
 import tdl.record.image.output.OutputToBarcodeReader;
 import tdl.record.time.FakeTimeSource;
 import tdl.record.time.TimeSource;
+import tdl.record.utils.ImageQualityHint;
 import tdl.record.video.VideoPlayer;
 import tdl.record.video.VideoRecorder;
 
@@ -36,12 +34,19 @@ public class RecordAcceptanceTest {
     @Ignore("Manual acceptance")
     public void record_screen_at_4x() throws Exception {
         //TODO The video recorder depends on native libraries. Create a startup test to check for the compliance/
-        VideoRecorder videoRecorder = new VideoRecorder(new InputFromScreen());
+        VideoRecorder videoRecorder = new VideoRecorder(
+                new ScaleToOptimalSizeImage(ImageQualityHint.MEDIUM, new InputFromScreen()));
 
         videoRecorder.open("text.mp4", 4, 1);
         videoRecorder.record(Duration.of(30, ChronoUnit.SECONDS));
 
         videoRecorder.close();
+    }
+
+    @Test
+    @Ignore("Manual acceptance")
+    public void multiple_screens() throws Exception {
+        //TODO Try the recording when you have multiple screens
     }
 
     /**
@@ -108,7 +113,8 @@ public class RecordAcceptanceTest {
         String referenceVideoFile = "src/test/resources/t_reference_recording.mp4";
         String destinationVideoFile = "build/recording_from_reference_video.mp4";
         TimeSource timeSource = new FakeTimeSource();
-        InputFromVideoFile imageInput = new InputFromVideoFile(referenceVideoFile, timeSource);
+        ImageInput imageInput = new ScaleToOptimalSizeImage(ImageQualityHint.LOW,
+                new InputFromVideoFile(referenceVideoFile, timeSource));
 
         VideoRecorder videoRecorder = new VideoRecorder(imageInput, timeSource);
         videoRecorder.open(destinationVideoFile, 4, 4);
@@ -123,7 +129,7 @@ public class RecordAcceptanceTest {
         // snap 1/sec = 2.79 comp
         // snap 2/sec = 2.43 comp
         // snap 3/sec = 2.22 comp
-        // snap 4/sec = 2.08 comp
+        //>snap 4/sec = 2.08 comp
         // snap 5/sec = 1.97 comp
         // snap 6/sec = 1.91 comp
         assertThat(compressionFactor, greaterThan(2.08d));
@@ -132,16 +138,28 @@ public class RecordAcceptanceTest {
 
     /**
      * Aspect ratio and scaling:
-     * TODO: Check VIMEO requirements, do we need to change the aspect ratio?
      */
     @Test
     @Ignore("Not implemented")
     public void large_screen_size_should_be_scaled_down() throws Exception {
-        //Generate large frames
+        //TODO Generate large frames
 
         //Assert that frames are smaller
     }
 
+
+    /**
+     * Frame rate sampling. On large desktops, taking a screenshot could take a lot of time.
+     */
+    @Test
+    @Ignore("Not implemented")
+    public void test_measure_recording_performance() throws Exception {
+        //TODO gather metrics
+
+        //Recording at high framerate and measure time it takes to capture screenshot
+
+        //Assert on performance metrics
+    }
 
     /**
      * Packets produced: The video should be broken down in discrete packets to make upload easier. (write every X min)
