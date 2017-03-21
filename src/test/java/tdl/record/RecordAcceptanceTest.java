@@ -8,6 +8,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import tdl.record.image.input.*;
 import tdl.record.image.output.OutputToBarcodeReader;
+import tdl.record.image.output.OutputToInMemoryBuffer;
 import tdl.record.time.FakeTimeSource;
 import tdl.record.time.TimeSource;
 import tdl.record.utils.ImageQualityHint;
@@ -105,7 +106,7 @@ public class RecordAcceptanceTest {
     /**
      * Size: Given known input containing movement, the size should be less than X
      */
-    @Ignore
+    @Ignore("This test fails on Codeship because we use the libraries to play the videofile")
     @Test
     public void size_should_be_kept_small_while_retaining_quality() throws Exception {
         //TODO Disable test if libraries not present
@@ -140,11 +141,24 @@ public class RecordAcceptanceTest {
      * Aspect ratio and scaling:
      */
     @Test
-    @Ignore("Not implemented")
     public void large_screen_size_should_be_scaled_down() throws Exception {
-        //TODO Generate large frames
+        String referenceImage = "src/test/resources/4k_wallpaper.jpg";
+        String destinationVideoFile = "build/recording_from_static_image.mp4";
 
-        //Assert that frames are smaller
+        TimeSource timeSource = new FakeTimeSource();
+        ImageInput imageInput = new ScaleToOptimalSizeImage(ImageQualityHint.LOW,
+                new InputFromStaticImage(referenceImage));
+
+        VideoRecorder videoRecorder = new VideoRecorder(imageInput, timeSource);
+        videoRecorder.open(destinationVideoFile, 4, 4);
+        videoRecorder.record(Duration.of(1, ChronoUnit.SECONDS));
+        videoRecorder.close();
+
+        VideoPlayer videoPlayer = new VideoPlayer(new OutputToInMemoryBuffer());
+        videoPlayer.open(destinationVideoFile);
+        assertThat(videoPlayer.getWidth(), is(1280));
+        assertThat(videoPlayer.getHeight(), is(720));
+        videoPlayer.close();
     }
 
 
