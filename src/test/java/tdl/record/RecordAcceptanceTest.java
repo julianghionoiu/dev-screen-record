@@ -164,8 +164,6 @@ public class RecordAcceptanceTest {
         assertThat(videoPlayer.getWidth(), is(1280));
         assertThat(videoPlayer.getHeight(), is(720));
         videoPlayer.close();
-
-        assertThat(metrics.getProcessingRatio(), closeTo(0.5, 0.1));
     }
 
 
