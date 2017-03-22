@@ -109,7 +109,6 @@ public class RecordAcceptanceTest {
     /**
      * Size: Given known input containing movement, the size should be less than X
      */
-    @Ignore("This test fails on Codeship because we use the libraries to play the videofile")
     @Test
     public void size_should_be_kept_small_while_retaining_quality() throws Exception {
         //TODO Disable test if libraries not present
@@ -174,7 +173,6 @@ public class RecordAcceptanceTest {
      * Frame rate sampling. On large desktops, taking a screenshot could take a lot of time.
      */
     @Test
-    @Ignore("This test requires a physical screen to be run")
     public void test_measure_recording_performance() throws Exception {
         //Record first video
         int lowRateSnapsPerSecond = 2;
