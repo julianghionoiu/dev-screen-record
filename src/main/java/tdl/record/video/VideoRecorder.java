@@ -5,12 +5,11 @@ import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
 import tdl.record.image.input.ImageInput;
 import tdl.record.image.input.InputImageGenerationException;
+import tdl.record.metrics.RecorderMetricsCollector;
 import tdl.record.time.SystemTimeSource;
 import tdl.record.time.TimeSource;
 
 import java.awt.*;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.Duration;
@@ -19,18 +18,43 @@ import java.util.concurrent.TimeUnit;
 public class VideoRecorder {
     private final ImageInput imageInput;
     private final TimeSource timeSource;
+    private final RecorderMetricsCollector metrics;
     private Muxer muxer;
     private Encoder encoder;
     private Rational videoFrameRate;
     private Rational inputFrameRate;
 
-    public VideoRecorder(ImageInput imageInput) {
-        this(imageInput, new SystemTimeSource());
-    }
-
-    public VideoRecorder(ImageInput imageInput, TimeSource timeSource) {
+    private VideoRecorder(ImageInput imageInput, TimeSource timeSource,
+                          RecorderMetricsCollector recorderMetricsCollector) {
         this.imageInput = imageInput;
         this.timeSource = timeSource;
+        this.metrics = recorderMetricsCollector;
+    }
+
+    public static class Builder {
+        private final ImageInput bImageInput;
+        private TimeSource bTimeSource;
+        private RecorderMetricsCollector bMetrics;
+
+        public Builder(ImageInput imageInput) {
+            bImageInput = imageInput;
+            bTimeSource = new SystemTimeSource();
+            bMetrics = new RecorderMetricsCollector();
+        }
+
+        public Builder withTimeSource(TimeSource timeSource) {
+            this.bTimeSource = timeSource;
+            return this;
+        }
+
+        public Builder withMetricsCollector(RecorderMetricsCollector metricsCollector) {
+            this.bMetrics = metricsCollector;
+            return this;
+        }
+
+        public VideoRecorder build() {
+            return new VideoRecorder(bImageInput, bTimeSource, bMetrics);
+        }
     }
 
     //TODO Sort out exceptions
@@ -95,12 +119,13 @@ public class VideoRecorder {
          */
         final MediaPacket packet = MediaPacket.make();
         double totalNumberOfFrames = inputFrameRate.rescale(duration.getSeconds(), Rational.make(1));
+        double timeBetweenFramesMillis = inputFrameRate.getValue() * 1000;
+        metrics.setExpectedTimeBetweenFrames(timeBetweenFramesMillis, TimeUnit.MILLISECONDS);
         for (long frameIndex = 0; frameIndex < totalNumberOfFrames; frameIndex++) {
             long timestampBeforeProcessing = timeSource.currentTimeNano();
+            metrics.notifyFrameStartAt(timestampBeforeProcessing, TimeUnit.NANOSECONDS, frameIndex);
 
             final BufferedImage screen = imageInput.readImage();
-            System.out.println("Snap ! " + frameIndex);
-
             converter.toPicture(picture, screen, frameIndex);
 
             // Flush the packet, the convention is to write until we get a new (incomplete) packet
@@ -115,7 +140,7 @@ public class VideoRecorder {
               With recordings, the biggest challenge is to maintain the requested frameRate.
               We need to trigger the read the next image at exactly the right time.
              */
-            double timeBetweenFramesMillis = inputFrameRate.getValue() * 1000;
+            metrics.notifyFrameEndAt(timeSource.currentTimeNano(), TimeUnit.NANOSECONDS, frameIndex);
             long nextTimestamp = timestampBeforeProcessing + TimeUnit.MILLISECONDS.toNanos((long) timeBetweenFramesMillis);
             timeSource.wakeUpAt(nextTimestamp, TimeUnit.NANOSECONDS);
         }

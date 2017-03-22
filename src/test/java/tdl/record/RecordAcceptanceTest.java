@@ -9,7 +9,9 @@ import org.junit.Test;
 import tdl.record.image.input.*;
 import tdl.record.image.output.OutputToBarcodeReader;
 import tdl.record.image.output.OutputToInMemoryBuffer;
+import tdl.record.metrics.RecorderMetricsCollector;
 import tdl.record.time.FakeTimeSource;
+import tdl.record.time.SystemTimeSource;
 import tdl.record.time.TimeSource;
 import tdl.record.utils.ImageQualityHint;
 import tdl.record.video.VideoPlayer;
@@ -35,10 +37,11 @@ public class RecordAcceptanceTest {
     @Ignore("Manual acceptance")
     public void record_screen_at_4x() throws Exception {
         //TODO The video recorder depends on native libraries. Create a startup test to check for the compliance/
-        VideoRecorder videoRecorder = new VideoRecorder(
-                new ScaleToOptimalSizeImage(ImageQualityHint.MEDIUM, new InputFromScreen()));
+        VideoRecorder videoRecorder = new VideoRecorder
+                .Builder(new ScaleToOptimalSizeImage(ImageQualityHint.HIGH, new InputFromScreen()))
+                .build();
 
-        videoRecorder.open("text.mp4", 4, 1);
+        videoRecorder.open("text.mp4", 4, 4);
         videoRecorder.record(Duration.of(30, ChronoUnit.SECONDS));
 
         videoRecorder.close();
@@ -76,7 +79,7 @@ public class RecordAcceptanceTest {
         String destinationVideo = "build/recording_from_barcode_at_4x.mp4";
         TimeSource recordTimeSource = new FakeTimeSource();
         ImageInput imageInput = new InputFromStreamOfBarcodes(BarcodeFormat.CODE_39, 300, 150, recordTimeSource);
-        VideoRecorder videoRecorder = new VideoRecorder(imageInput, recordTimeSource);
+        VideoRecorder videoRecorder = new VideoRecorder.Builder(imageInput).withTimeSource(recordTimeSource).build();
 
         // Capture video
         videoRecorder.open(destinationVideo, 5, 4);
@@ -114,10 +117,10 @@ public class RecordAcceptanceTest {
         String referenceVideoFile = "src/test/resources/t_reference_recording.mp4";
         String destinationVideoFile = "build/recording_from_reference_video.mp4";
         TimeSource timeSource = new FakeTimeSource();
-        ImageInput imageInput = new ScaleToOptimalSizeImage(ImageQualityHint.LOW,
+        ImageInput imageInput = new ScaleToOptimalSizeImage(ImageQualityHint.MEDIUM,
                 new InputFromVideoFile(referenceVideoFile, timeSource));
 
-        VideoRecorder videoRecorder = new VideoRecorder(imageInput, timeSource);
+        VideoRecorder videoRecorder = new VideoRecorder.Builder(imageInput).withTimeSource(timeSource).build();
         videoRecorder.open(destinationVideoFile, 4, 4);
         videoRecorder.record(Duration.of(60, ChronoUnit.SECONDS));
         videoRecorder.close();
@@ -145,12 +148,15 @@ public class RecordAcceptanceTest {
         String referenceImage = "src/test/resources/4k_wallpaper.jpg";
         String destinationVideoFile = "build/recording_from_static_image.mp4";
 
-        TimeSource timeSource = new FakeTimeSource();
         ImageInput imageInput = new ScaleToOptimalSizeImage(ImageQualityHint.LOW,
                 new InputFromStaticImage(referenceImage));
+        RecorderMetricsCollector metrics = new RecorderMetricsCollector();
 
-        VideoRecorder videoRecorder = new VideoRecorder(imageInput, timeSource);
-        videoRecorder.open(destinationVideoFile, 4, 4);
+        VideoRecorder videoRecorder = new VideoRecorder.Builder(imageInput)
+                .withTimeSource(new SystemTimeSource())
+                .withMetricsCollector(metrics)
+                .build();
+        videoRecorder.open(destinationVideoFile, 10, 4);
         videoRecorder.record(Duration.of(1, ChronoUnit.SECONDS));
         videoRecorder.close();
 
@@ -159,6 +165,8 @@ public class RecordAcceptanceTest {
         assertThat(videoPlayer.getWidth(), is(1280));
         assertThat(videoPlayer.getHeight(), is(720));
         videoPlayer.close();
+
+        assertThat(metrics.getProcessingRatio(), closeTo(0.5, 0.1));
     }
 
 
@@ -166,13 +174,44 @@ public class RecordAcceptanceTest {
      * Frame rate sampling. On large desktops, taking a screenshot could take a lot of time.
      */
     @Test
-    @Ignore("Not implemented")
+    @Ignore("This test requires a physical screen to be run")
     public void test_measure_recording_performance() throws Exception {
-        //TODO gather metrics
+        //Record first video
+        int lowRateSnapsPerSecond = 2;
+        RecorderMetricsCollector metricsLowFramerate = new RecorderMetricsCollector();
+        {
+            String destinationVideoFile = "build/recording_for_metrics1.mp4";
+            ImageInput imageInput = new ScaleToOptimalSizeImage(ImageQualityHint.LOW, new InputFromScreen());
+            VideoRecorder videoRecorder = new VideoRecorder.Builder(imageInput)
+                    .withMetricsCollector(metricsLowFramerate).build();
+            videoRecorder.open(destinationVideoFile, lowRateSnapsPerSecond, 4);
+            videoRecorder.record(Duration.of(1, ChronoUnit.SECONDS));
+            videoRecorder.close();
+        }
 
-        //Recording at high framerate and measure time it takes to capture screenshot
+        //Record second video
+        int highRateSnapsPerSecond = 4;
+        RecorderMetricsCollector metricsHighFramerate = new RecorderMetricsCollector();
+        {
+            String destinationVideoFile = "build/recording_for_metrics2.mp4";
+            ImageInput imageInput = new ScaleToOptimalSizeImage(ImageQualityHint.LOW, new InputFromScreen());
+            VideoRecorder videoRecorder = new VideoRecorder.Builder(imageInput)
+                    .withMetricsCollector(metricsHighFramerate).build();
+            videoRecorder.open(destinationVideoFile, highRateSnapsPerSecond, 4);
+            videoRecorder.record(Duration.of(1, ChronoUnit.SECONDS));
+            videoRecorder.close();
+        }
 
         //Assert on performance metrics
+        double lowCoefficient = lowRateSnapsPerSecond / metricsLowFramerate.getProcessingRatio();
+        System.out.println("snapsPerSecond:"+lowRateSnapsPerSecond+
+                ", processingRatio = "+metricsLowFramerate.getProcessingRatio()+
+                ", coefficient = "+lowCoefficient);
+        double highCoefficient = highRateSnapsPerSecond / metricsHighFramerate.getProcessingRatio();
+        System.out.println("snapsPerSecond:"+highRateSnapsPerSecond+
+                ", processingRatio = "+metricsHighFramerate.getProcessingRatio()+
+                ", coefficient = "+highCoefficient);
+        assertThat(lowCoefficient, closeTo(highCoefficient, 1));
     }
 
     /**
