@@ -1,9 +1,11 @@
 package tdl.record.time;
 
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class SystemTimeSource implements TimeSource {
-
 
     @Override
     public long currentTimeNano() {
@@ -20,7 +22,7 @@ public class SystemTimeSource implements TimeSource {
                 .toMillis(targetTimestampNano - currentTimestampNano);
 
         if (timeToSleepMillis > 1) {
-            System.out.println("Sleep for: " + timeToSleepMillis);
+            log.debug("Sleep for: {} millis", timeToSleepMillis);
             Thread.sleep(timeToSleepMillis);
         }
     }

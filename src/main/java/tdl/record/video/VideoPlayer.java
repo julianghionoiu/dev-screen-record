@@ -3,8 +3,7 @@ package tdl.record.video;
 import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import tdl.record.image.output.ImageOutput;
 import tdl.record.image.output.ImageOutputException;
 import tdl.record.time.SystemTimeSource;
@@ -17,9 +16,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class VideoPlayer {
-    private static final Logger logger = LoggerFactory.getLogger(VideoPlayer.class);
-
     private final ImageOutput imageOutput;
     private final TimeSource timeSource;
     private Demuxer demuxer;
@@ -64,8 +62,8 @@ public class VideoPlayer {
 
 
         int videoStreamId = videoStream.getIndex();
-        System.out.println("videoStreamId: " + videoStreamId);
-        System.out.println("stream.getIndex(): " + videoStream.getIndex());
+        log.debug("videoStreamId {}",videoStreamId);
+        log.debug("stream.getIndex() {}",videoStream.getIndex());
         Decoder videoDecoder = videoStream.getDecoder();
 
         /*
@@ -97,15 +95,15 @@ public class VideoPlayer {
            If you play with the references, it is possible to speed up or slow down the passing of time
          */
         streamTimebase = videoStream.getTimeBase();
-        System.out.println("streamTimebase = " + streamTimebase);
+        log.debug("streamTimebase  {}",streamTimebase);
         long streamVideoDuration = videoStream.getDuration();
-        System.out.println("streamVideoDuration: " + streamVideoDuration);
+        log.debug("streamVideoDuration {}",streamVideoDuration);
 
         // Set units for the system time, which will be in nanoseconds.
         systemTimeBase = Rational.make(1, 1000000000);
-        System.out.println("systemTimeBase = " + systemTimeBase);
+        log.debug("systemTimeBase {}",systemTimeBase);
         long systemVideoDuration = systemTimeBase.rescale(streamVideoDuration, streamTimebase);
-        System.out.println("systemVideoDuration: " + systemVideoDuration);
+        log.debug("systemVideoDuration {}",systemVideoDuration);
 
         // Reset time counters
         previousStreamEndTime = -1;
@@ -225,7 +223,7 @@ public class VideoPlayer {
             imageOutput.close();
             demuxer.close();
         } catch (InterruptedException | IOException e) {
-            logger.warn("Failed to close video", e);
+            log.warn("Failed to close video", e);
         }
     }
 
@@ -235,16 +233,16 @@ public class VideoPlayer {
                                                     final Rational systemTimeBase, final Rational streamTimebase)
             throws InterruptedException {
         long streamTimestamp = picture.getTimeStamp();
-        System.out.println("streamStartTime: " + Long.toString(streamStartTime));
-        System.out.println("streamTimestamp: " + Long.toString(streamTimestamp));
+        log.debug("streamStartTime: {}", Long.toString(streamStartTime));
+        log.debug("streamTimestamp {}", Long.toString(streamTimestamp));
 
         // convert streamTimestamp into system units (i.e. nano-seconds)
-        System.out.println("systemTimeBase: " + systemTimeBase);
+        log.debug("systemTimeBase {}",systemTimeBase);
         long relativeStreamTimestamp = systemTimeBase.rescale(streamTimestamp - streamStartTime, streamTimebase);
-        System.out.println("relativeStreamTimestamp: " + Long.toString(relativeStreamTimestamp));
-        System.out.println("systemStartTime: " + systemStartTime);
+        log.debug("relativeStreamTimestamp {}",Long.toString(relativeStreamTimestamp));
+        log.debug("systemStartTime {}",systemStartTime);
         long targetSystemTimestamp = systemStartTime + relativeStreamTimestamp;
-        System.out.println("targetSystemTimestamp: " + Long.toString(targetSystemTimestamp));
+        log.debug("targetSystemTimestamp {}",Long.toString(targetSystemTimestamp));
         timeSource.wakeUpAt(targetSystemTimestamp, TimeUnit.NANOSECONDS);
 
         // Convert the image from Humble format into Java images.

@@ -1,6 +1,10 @@
 package tdl.record.metrics;
+
+import lombok.extern.slf4j.Slf4j;
+
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class RecorderMetricsCollector {
     private long expectedTimeBetweenFramesNanos;
     private long timestampBeforeProcessingNanos;
@@ -19,14 +23,14 @@ public class RecorderMetricsCollector {
     }
 
     public void notifyFrameStartAt(long timestampBeforeProcessing, TimeUnit unit, long frameIndex) {
-        System.out.println("Snap ! " + frameIndex);
+        log.debug("Snap ! {}", frameIndex);
         timestampBeforeProcessingNanos = unit.toNanos(timestampBeforeProcessing);
     }
 
     public void notifyFrameEndAt(long timestampNow, TimeUnit unit, long frameIndex) {
         long timeSpendProcessingNanos = unit.toNanos(timestampNow) - timestampBeforeProcessingNanos;
         processingRatio = timeSpendProcessingNanos / (double) expectedTimeBetweenFramesNanos;
-        System.out.println("processingRatio: "+processingRatio);
+        log.debug("processingRatio: {}", processingRatio);
     }
 
     //~~~~~~~~~~ Getters

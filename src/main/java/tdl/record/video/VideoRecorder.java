@@ -3,8 +3,7 @@ package tdl.record.video;
 import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import tdl.record.image.input.ImageInput;
 import tdl.record.image.input.InputImageGenerationException;
 import tdl.record.metrics.RecorderMetricsCollector;
@@ -16,9 +15,8 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
+@Slf4j
 public class VideoRecorder {
-    private static final Logger logger = LoggerFactory.getLogger(VideoRecorder.class);
-
     private final ImageInput imageInput;
     private final TimeSource timeSource;
     private final RecorderMetricsCollector metrics;
@@ -70,7 +68,7 @@ public class VideoRecorder {
         videoFrameRate = Rational.make(1, timeSpeedUpFactor * snapsPerSecond);
 
         // Prime the image input
-        logger.info("Open the input stream");
+        log.info("Open the input stream");
         try {
             imageInput.open();
         } catch (InputImageGenerationException e) {
@@ -144,7 +142,7 @@ public class VideoRecorder {
             try {
                 screen = imageInput.readImage();
             } catch (InputImageGenerationException e) {
-                logger.error("Failed to acquire image", e);
+                log.error("Failed to acquire image", e);
                 break;
             }
             converter.toPicture(picture, screen, frameIndex);
@@ -166,14 +164,14 @@ public class VideoRecorder {
             try {
                 timeSource.wakeUpAt(nextTimestamp, TimeUnit.NANOSECONDS);
             } catch (InterruptedException e) {
-                logger.warn("Interrupted while sleeping", e);
+                log.warn("Interrupted while sleeping", e);
             }
         }
 
         /*
           Flush the encoder by writing data until we get a new (incomplete) packet
          */
-        logger.info("Flushing remaining frames");
+        log.info("Flushing remaining frames");
         do {
             encoder.encode(packet, null);
             if (packet.isComplete())
@@ -182,7 +180,7 @@ public class VideoRecorder {
     }
 
     public void close() {
-        logger.info("Closing the video stream");
+        log.info("Closing the video stream");
         imageInput.close();
         muxer.close();
     }
