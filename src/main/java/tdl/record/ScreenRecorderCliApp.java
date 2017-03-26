@@ -26,6 +26,8 @@ public class ScreenRecorderCliApp {
     }
 
     private void run() throws VideoRecorderException {
+        //TODO Add a shutdown hook so that the recording stops gracefully
+
         VideoRecorder videoRecorder = new VideoRecorder
                 .Builder(new ScaleToOptimalSizeImage(ImageQualityHint.MEDIUM, new InputFromScreen()))
                 .build();
@@ -34,7 +36,9 @@ public class ScreenRecorderCliApp {
             throw new IllegalArgumentException("Continuous recording not implemented");
         }
         videoRecorder.open(destinationPath, 4, 4);
-        videoRecorder.record(Duration.of(1, ChronoUnit.MINUTES));
+
+        //TODO Display a status message every minute so that the user gets feedback on the recording
+        videoRecorder.record(Duration.of(recordingTime, ChronoUnit.MINUTES));
 
         videoRecorder.close();
     }
