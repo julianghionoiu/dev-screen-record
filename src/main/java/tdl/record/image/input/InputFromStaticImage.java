@@ -43,7 +43,7 @@ public class InputFromStaticImage implements ImageInput {
     }
 
     @Override
-    public void close() throws IOException, InterruptedException {
+    public void close() {
 
     }
 }

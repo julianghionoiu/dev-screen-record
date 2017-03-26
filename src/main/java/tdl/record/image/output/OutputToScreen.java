@@ -14,10 +14,10 @@ public class OutputToScreen implements ImageOutput {
     }
 
     @Override
-    public void open() throws IllegalStateException {
+    public void open() throws ImageOutputException {
         window = ImageFrame.make();
         if (window == null) {
-            throw new IllegalStateException("Cannot create display frame. Maybe there is no screen available.");
+            throw new ImageOutputException("Cannot create display frame. Maybe there is no screen available.");
         }
     }
 

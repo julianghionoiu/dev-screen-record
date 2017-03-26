@@ -1,20 +1,27 @@
 //~~~~ Settings for Gradle
 buildscript {
     repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
         mavenCentral()
     }
     dependencies {
         classpath "org.kt3k.gradle.plugin:coveralls-gradle-plugin:2.8.1"
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.3'
     }
 }
 
-group 'ro'
-
-version '1.0-SNAPSHOT'
 apply plugin: 'java'
+apply plugin: 'application'
+
+group 'ro'
+version '1.0-SNAPSHOT'
 
 //noinspection GroovyUnusedAssignment
-sourceCompatibility = 1.8
+targetCompatibility = JavaVersion.VERSION_1_8
+//noinspection GroovyUnusedAssignment
+sourceCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
     mavenCentral()
@@ -23,12 +30,25 @@ repositories {
 dependencies {
     compile 'io.humble:humble-video-all:0.2.1'
     compile 'com.google.zxing:core:3.3.0'
+    compile 'org.slf4j:slf4j-api:1.7.25'
+    compile 'ch.qos.logback:logback-classic:1.1.3'
 
     testCompile('junit:junit:4.11'){
         exclude group: 'org.hamcrest', module: 'hamcrest-core'
     }
     testCompile 'org.hamcrest:hamcrest-core:1.3'
     testCompile 'org.hamcrest:hamcrest-library:1.3'
+}
+
+// ~~~~~ Packaging
+
+apply plugin: 'com.github.johnrengelman.shadow'
+
+mainClassName = "tdl.record.ScreenRecorderCliApp"
+jar {
+    manifest {
+        attributes "Main-Class": "$mainClassName"
+    }
 }
 
 // ~~~~~ Gather coverage

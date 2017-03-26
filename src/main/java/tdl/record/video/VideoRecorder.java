@@ -3,19 +3,22 @@ package tdl.record.video;
 import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tdl.record.image.input.ImageInput;
 import tdl.record.image.input.InputImageGenerationException;
 import tdl.record.metrics.RecorderMetricsCollector;
 import tdl.record.time.SystemTimeSource;
 import tdl.record.time.TimeSource;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 public class VideoRecorder {
+    private static final Logger logger = LoggerFactory.getLogger(VideoRecorder.class);
+
     private final ImageInput imageInput;
     private final TimeSource timeSource;
     private final RecorderMetricsCollector metrics;
@@ -57,9 +60,7 @@ public class VideoRecorder {
         }
     }
 
-    //TODO Sort out exceptions
-    public void open(String filename, int snapsPerSecond, int timeSpeedUpFactor)
-            throws AWTException, IOException, InterruptedException, InputImageGenerationException {
+    public void open(String filename, int snapsPerSecond, int timeSpeedUpFactor) throws VideoRecorderException {
         /*
            With videos it is all about timing.
            We need to keep two frames of reference, one for the input and one for the output (video)
@@ -69,7 +70,12 @@ public class VideoRecorder {
         videoFrameRate = Rational.make(1, timeSpeedUpFactor * snapsPerSecond);
 
         // Prime the image input
-        imageInput.open();
+        logger.info("Open the input stream");
+        try {
+            imageInput.open();
+        } catch (InputImageGenerationException e) {
+            throw new VideoRecorderException("Could not open input source", e);
+        }
 
         // A muxer is responsible for combining multiple streams (video, audio, subtitle)
         muxer = Muxer.make(filename, null, null);
@@ -94,11 +100,14 @@ public class VideoRecorder {
         // Open the stream and the muxer
         encoder.open(null, null);
         muxer.addNewStream(encoder);
-        muxer.open(null, null);
+        try {
+            muxer.open(null, null);
+        } catch (InterruptedException | IOException e) {
+            throw new VideoRecorderException("Failed to open destination", e);
+        }
     }
 
-    public void record(Duration duration)
-            throws AWTException, InterruptedException, IOException, InputImageGenerationException {
+    public void record(Duration duration) throws VideoRecorderException {
 
         /*
           Care must be taken so that the picture is encoded using the same format as Encoder.
@@ -109,8 +118,14 @@ public class VideoRecorder {
                 encoder.getHeight(),
                 encoder.getPixelFormat());
         picture.setTimeBase(videoFrameRate);
+        BufferedImage sampleImage;
+        try {
+            sampleImage = imageInput.getSampleImage();
+        } catch (InputImageGenerationException e) {
+            throw new VideoRecorderException("Could not get sample image from input source",e);
+        }
         MediaPictureConverter converter = MediaPictureConverterFactory
-                .createConverter(imageInput.getSampleImage(), picture);
+                .createConverter(sampleImage, picture);
 
 
         /*
@@ -125,7 +140,13 @@ public class VideoRecorder {
             long timestampBeforeProcessing = timeSource.currentTimeNano();
             metrics.notifyFrameStartAt(timestampBeforeProcessing, TimeUnit.NANOSECONDS, frameIndex);
 
-            final BufferedImage screen = imageInput.readImage();
+            final BufferedImage screen;
+            try {
+                screen = imageInput.readImage();
+            } catch (InputImageGenerationException e) {
+                logger.error("Failed to acquire image", e);
+                break;
+            }
             converter.toPicture(picture, screen, frameIndex);
 
             // Flush the packet, the convention is to write until we get a new (incomplete) packet
@@ -142,12 +163,17 @@ public class VideoRecorder {
              */
             metrics.notifyFrameEndAt(timeSource.currentTimeNano(), TimeUnit.NANOSECONDS, frameIndex);
             long nextTimestamp = timestampBeforeProcessing + TimeUnit.MILLISECONDS.toNanos((long) timeBetweenFramesMillis);
-            timeSource.wakeUpAt(nextTimestamp, TimeUnit.NANOSECONDS);
+            try {
+                timeSource.wakeUpAt(nextTimestamp, TimeUnit.NANOSECONDS);
+            } catch (InterruptedException e) {
+                logger.warn("Interrupted while sleeping", e);
+            }
         }
 
         /*
           Flush the encoder by writing data until we get a new (incomplete) packet
          */
+        logger.info("Flushing remaining frames");
         do {
             encoder.encode(packet, null);
             if (packet.isComplete())
@@ -155,7 +181,8 @@ public class VideoRecorder {
         } while (packet.isComplete());
     }
 
-    public void close() throws IOException, InterruptedException {
+    public void close() {
+        logger.info("Closing the video stream");
         imageInput.close();
         muxer.close();
     }

@@ -5,7 +5,6 @@ import java.io.IOException;
 
 public interface ImageInput {
 
-    //TODO Sort out the exceptions
     void open() throws InputImageGenerationException;
 
     BufferedImage readImage()
@@ -22,6 +21,5 @@ public interface ImageInput {
 
     int getHeight();
 
-    //TODO Sort out exceptions
-    void close() throws IOException, InterruptedException;
+    void close();
 }

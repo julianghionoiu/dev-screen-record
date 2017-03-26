@@ -36,7 +36,6 @@ public class RecordAcceptanceTest {
     @Test
     @Ignore("Manual acceptance")
     public void record_screen_at_4x() throws Exception {
-        //TODO The video recorder depends on native libraries. Create a startup test to check for the compliance/
         VideoRecorder videoRecorder = new VideoRecorder
                 .Builder(new ScaleToOptimalSizeImage(ImageQualityHint.HIGH, new InputFromScreen()))
                 .build();
@@ -53,27 +52,6 @@ public class RecordAcceptanceTest {
         //TODO Try the recording when you have multiple screens
     }
 
-    /**
-     * Records at 4x: Given screen displays stream of X..Y..Z, an mp4 movie should be produced containing XYZ at key frames
-     * <p>
-     * Input:
-     * - time
-     * - screen
-     * <p>
-     * Output:
-     * - file
-     * <p>
-     * Tasks:
-     * - simulate time, allow Thread.sleep to fake the passing of time
-     * - simulate screen
-     * - generate an input video (either mp4 or BufferedImage array)
-     * - have the ability to retrieve the frame based on timestamp
-     * - connect simulated screen with simulated time
-     * - check the existence of key frames in the video output
-     * - use a real video (normal speed and 30fps) as input and perform a decode on it: https://github.com/artclarke/humble-video/blob/master/humble-video-demos/src/main/java/io/humble/video/demos/DecodeAndPlayVideo.java
-     * - check our barcode generation: 'net.glxn.qrgen.javase'
-     * - maybe by generating and reading barcodes ? https://github.com/zxing/zxing
-     */
     @Test
     public void can_record_video_at_specified_frame_rate_and_speed() throws Exception {
         String destinationVideo = "build/recording_from_barcode_at_4x.mp4";
@@ -106,13 +84,8 @@ public class RecordAcceptanceTest {
         assertThat(decodedBarcodes, areConsistentWith(4));
     }
 
-    /**
-     * Size: Given known input containing movement, the size should be less than X
-     */
     @Test
     public void size_should_be_kept_small_while_retaining_quality() throws Exception {
-        //TODO Disable test if libraries not present
-
         String referenceVideoFile = "src/test/resources/t_reference_recording.mp4";
         String destinationVideoFile = "build/recording_from_reference_video.mp4";
         TimeSource timeSource = new FakeTimeSource();
@@ -139,9 +112,6 @@ public class RecordAcceptanceTest {
     }
 
 
-    /**
-     * Aspect ratio and scaling:
-     */
     @Test
     public void large_screen_size_should_be_scaled_down() throws Exception {
         String referenceImage = "src/test/resources/4k_wallpaper.jpg";
@@ -216,7 +186,8 @@ public class RecordAcceptanceTest {
     @Test
     @Ignore("Not implemented")
     public void video_should_be_broken_down_into_discrete_packets_to_help_with_upload() throws Exception {
-        //TODO Before doing this play a spike. What is the best way to upload a file?  One big file + Multipart, or multiple small files.
+        //TODO Before doing this, play a spike. What is the best way to upload a file?
+        //TODO One big file + Multipart, or multiple small files.
 
         //Check generated files and assert frames contain the right timestamp
     }

@@ -4,8 +4,7 @@ import java.awt.image.BufferedImage;
 
 public interface ImageOutput {
 
-    //TODO: Sort out exceptions
-    void open() throws IllegalStateException;
+    void open() throws ImageOutputException;
 
     /**
      * Provide a sample of the expected output. This is required to be able to match the format of the BufferedImage.

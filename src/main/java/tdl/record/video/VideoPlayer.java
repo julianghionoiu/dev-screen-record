@@ -3,7 +3,10 @@ package tdl.record.video;
 import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tdl.record.image.output.ImageOutput;
+import tdl.record.image.output.ImageOutputException;
 import tdl.record.time.SystemTimeSource;
 import tdl.record.time.TimeSource;
 
@@ -15,6 +18,8 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class VideoPlayer {
+    private static final Logger logger = LoggerFactory.getLogger(VideoPlayer.class);
+
     private final ImageOutput imageOutput;
     private final TimeSource timeSource;
     private Demuxer demuxer;
@@ -34,15 +39,28 @@ public class VideoPlayer {
         this.timeSource = timeSource;
     }
 
-    public void open(String filename) throws IOException, InterruptedException {
-        imageOutput.open();
+    public void open(String filename) throws VideoPlayerException {
+        try {
+            imageOutput.open();
+        } catch (ImageOutputException e) {
+            throw new VideoPlayerException("Failed to open video source",e);
+        }
 
         // A demuxer can separate the media streams from a media file ( video, audio, subtitles )
         demuxer = Demuxer.make();
-        demuxer.open(filename, null, false, true, null, null);
+        try {
+            demuxer.open(filename, null, false, true, null, null);
+        } catch (InterruptedException | IOException e) {
+            throw new VideoPlayerException("Failed to open demuxer", e);
+        }
 
-        videoStream = getFirstVideoStreamFrom(demuxer)
-                .orElseThrow(() -> new RuntimeException("Could not find video stream in container " + filename));
+
+        try {
+            videoStream = getFirstVideoStreamFrom(demuxer)
+                    .orElseThrow(() -> new RuntimeException("Could not find video stream in container " + filename));
+        } catch (InterruptedException | IOException e) {
+            throw new VideoPlayerException("Failed to retrieve video stream from file", e);
+        }
 
 
         int videoStreamId = videoStream.getIndex();
@@ -202,9 +220,13 @@ public class VideoPlayer {
         } while (picture.isComplete());
     }
 
-    public void close() throws IOException, InterruptedException {
-        imageOutput.close();
-        demuxer.close();
+    public void close()  {
+        try {
+            imageOutput.close();
+            demuxer.close();
+        } catch (InterruptedException | IOException e) {
+            logger.warn("Failed to close video", e);
+        }
     }
 
     private BufferedImage displayVideoAtCorrectTime(long streamStartTime,

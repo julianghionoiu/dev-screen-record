@@ -1,14 +1,20 @@
 package tdl.record.image.input;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tdl.record.image.output.OutputToInMemoryBuffer;
 import tdl.record.time.TimeSource;
 import tdl.record.video.VideoPlayer;
+import tdl.record.video.VideoPlayerException;
+import tdl.record.video.VideoRecorder;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class InputFromVideoFile implements ImageInput {
+    private static final Logger logger = LoggerFactory.getLogger(VideoRecorder.class);
+
     private final String videoUrl;
     private final VideoPlayer videoPlayer;
     private final OutputToInMemoryBuffer inMemoryBuffer;
@@ -27,7 +33,7 @@ public class InputFromVideoFile implements ImageInput {
         try {
             videoPlayer.open(videoUrl);
             systemStartTime = timeSource.currentTimeNano();
-        } catch (IOException | InterruptedException e) {
+        } catch (VideoPlayerException e) {
             throw new InputImageGenerationException(e);
         }
     }
@@ -59,7 +65,7 @@ public class InputFromVideoFile implements ImageInput {
     }
 
     @Override
-    public void close() throws IOException, InterruptedException {
+    public void close()  {
         videoPlayer.close();
     }
 }
