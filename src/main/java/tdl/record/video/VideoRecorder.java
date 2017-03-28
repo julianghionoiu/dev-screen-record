@@ -14,6 +14,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 public class VideoRecorder {
@@ -25,6 +26,7 @@ public class VideoRecorder {
     private Rational videoFrameRate;
     private Rational inputFrameRate;
     private MediaPacket packet;
+    private final AtomicBoolean shouldStopJob = new AtomicBoolean(false);
 
     private VideoRecorder(ImageInput imageInput, TimeSource timeSource,
                           RecorderMetricsCollector recorderMetricsCollector) {
@@ -109,10 +111,10 @@ public class VideoRecorder {
         packet = MediaPacket.make();
     }
 
-    public void record(Duration duration) throws VideoRecorderException {
+    public void start(Duration duration) throws VideoRecorderException {
         try {
             doRecord(duration);
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             throw new VideoRecorderException("Fatal exception while recording", e);
         } finally {
             flush();
@@ -175,10 +177,21 @@ public class VideoRecorder {
             try {
                 timeSource.wakeUpAt(nextTimestamp, TimeUnit.NANOSECONDS);
             } catch (InterruptedException e) {
-                log.warn("Interrupted while sleeping", e);
+                log.debug("Interrupted while sleeping", e);
+            }
+
+            // Allow a different thread to stop the recording
+            if (shouldStopJob.get()) {
+                break;
             }
         }
     }
+
+    public void stop() {
+        log.info("Stopping recording");
+        shouldStopJob.set(true);
+    }
+
 
     public void close() {
         log.info("Closing the video stream");

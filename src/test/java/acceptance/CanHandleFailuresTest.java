@@ -21,7 +21,15 @@ import static org.hamcrest.MatcherAssert.assertThat;
 public class CanHandleFailuresTest {
 
     @Test
-    public void recording_should_stop_gracefully_if_interrupted() throws Exception {
+    @Ignore("Manual test")
+    public void recording_should_stop_gracefully_on_sigterm() throws Exception {
+        //Start recording
+        //Send SIGTERM (Ctrl+C)
+        //Check that the video produced is still usable
+    }
+
+    @Test
+    public void recording_should_stop_gracefully_on_fatal_exception() throws Exception {
         String destinationVideo = "build/recording_interrupted_by_exception.mp4";
         TimeSource recordTimeSource = new FakeTimeSource();
         ImageInput imageInput = new InputFromStreamOfBarcodes(BarcodeFormat.CODE_39, 300, 150, recordTimeSource);
@@ -32,7 +40,7 @@ public class CanHandleFailuresTest {
         // Capture video
         videoRecorder.open(destinationVideo, 5, 1);
         try {
-            videoRecorder.record(Duration.of(60, ChronoUnit.SECONDS));
+            videoRecorder.start(Duration.of(60, ChronoUnit.SECONDS));
         } catch (Exception e) {
             System.out.println("Exception caught and ignored: "+e.getMessage());
         }

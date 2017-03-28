@@ -29,20 +29,34 @@ public class ScreenRecorderCliApp {
     }
 
     private void run() throws VideoRecorderException {
-        //TODO Add a shutdown hook so that the recording stops gracefully
-
-        VideoRecorder videoRecorder = new VideoRecorder
-                .Builder(new ScaleToOptimalSizeImage(ImageQualityHint.MEDIUM, new InputFromScreen()))
-                .build();
-
         if (recordingTime < 0) {
             throw new IllegalArgumentException("Continuous recording not implemented");
         }
-        videoRecorder.open(destinationPath, 4, 4);
 
         //TODO Display a status message every minute so that the user gets feedback on the recording
-        videoRecorder.record(Duration.of(recordingTime, ChronoUnit.MINUTES));
+        VideoRecorder videoRecorder = new VideoRecorder
+                .Builder(new ScaleToOptimalSizeImage(ImageQualityHint.MEDIUM, new InputFromScreen()))
+                .build();
+        registerShutdownHook(videoRecorder);
 
+        videoRecorder.open(destinationPath, 4, 4);
+        videoRecorder.start(Duration.of(recordingTime, ChronoUnit.MINUTES));
         videoRecorder.close();
+    }
+
+    private void registerShutdownHook(final VideoRecorder videoRecorder) {
+        final Thread mainThread = Thread.currentThread();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            videoRecorder.stop();
+            if (!mainThread.isInterrupted()) {
+                mainThread.interrupt();
+            }
+
+            try {
+                mainThread.join();
+            } catch (InterruptedException e) {
+                log.warn("Could not join main thread", e);
+            }
+        }));
     }
 }

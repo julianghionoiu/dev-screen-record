@@ -41,7 +41,7 @@ public class CanRecordVideoTest {
                 .build();
 
         videoRecorder.open("text.mp4", 4, 4);
-        videoRecorder.record(Duration.of(30, ChronoUnit.SECONDS));
+        videoRecorder.start(Duration.of(30, ChronoUnit.SECONDS));
 
         videoRecorder.close();
     }
@@ -61,7 +61,7 @@ public class CanRecordVideoTest {
 
         // Capture video
         videoRecorder.open(destinationVideo, 5, 4);
-        videoRecorder.record(Duration.of(12, ChronoUnit.SECONDS));
+        videoRecorder.start(Duration.of(12, ChronoUnit.SECONDS));
         videoRecorder.close();
 
         // Read recorded video parameters
@@ -94,7 +94,7 @@ public class CanRecordVideoTest {
 
         VideoRecorder videoRecorder = new VideoRecorder.Builder(imageInput).withTimeSource(timeSource).build();
         videoRecorder.open(destinationVideoFile, 4, 4);
-        videoRecorder.record(Duration.of(60, ChronoUnit.SECONDS));
+        videoRecorder.start(Duration.of(60, ChronoUnit.SECONDS));
         videoRecorder.close();
 
         // Lock down the destination size
@@ -126,7 +126,7 @@ public class CanRecordVideoTest {
                 .withMetricsCollector(metrics)
                 .build();
         videoRecorder.open(destinationVideoFile, 10, 4);
-        videoRecorder.record(Duration.of(1, ChronoUnit.SECONDS));
+        videoRecorder.start(Duration.of(1, ChronoUnit.SECONDS));
         videoRecorder.close();
 
         VideoPlayer videoPlayer = new VideoPlayer(new OutputToInMemoryBuffer());
@@ -151,7 +151,7 @@ public class CanRecordVideoTest {
             VideoRecorder videoRecorder = new VideoRecorder.Builder(imageInput)
                     .withMetricsCollector(metricsLowFramerate).build();
             videoRecorder.open(destinationVideoFile, lowRateSnapsPerSecond, 4);
-            videoRecorder.record(Duration.of(1, ChronoUnit.SECONDS));
+            videoRecorder.start(Duration.of(1, ChronoUnit.SECONDS));
             videoRecorder.close();
         }
 
@@ -164,7 +164,7 @@ public class CanRecordVideoTest {
             VideoRecorder videoRecorder = new VideoRecorder.Builder(imageInput)
                     .withMetricsCollector(metricsHighFramerate).build();
             videoRecorder.open(destinationVideoFile, highRateSnapsPerSecond, 4);
-            videoRecorder.record(Duration.of(1, ChronoUnit.SECONDS));
+            videoRecorder.start(Duration.of(1, ChronoUnit.SECONDS));
             videoRecorder.close();
         }
 
