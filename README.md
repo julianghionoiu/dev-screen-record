@@ -5,6 +5,6 @@
 Java command line tool to record a programming session
 
 ```
-./gradlew fatCapsule
-java -jar ./build/libs/dev-screen-record-1.0-SNAPSHOT-capsule.jar -t 10
+./gradlew mavenCapsule
+java -jar ./build/libs/dev-screen-record-1.0-SNAPSHOT-capsule.jar --duration 1
 ```

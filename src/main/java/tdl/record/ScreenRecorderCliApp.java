@@ -2,6 +2,7 @@ package tdl.record;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
+import lombok.extern.slf4j.Slf4j;
 import tdl.record.image.input.InputFromScreen;
 import tdl.record.image.input.ScaleToOptimalSizeImage;
 import tdl.record.utils.ImageQualityHint;
@@ -11,15 +12,17 @@ import tdl.record.video.VideoRecorderException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 
+@Slf4j
 public class ScreenRecorderCliApp {
-    @Parameter(names = {"-d", "-destination"}, description = "The path to the recording file")
+    @Parameter(names = {"-o", "--output"}, description = "The path to the recording file")
     private String destinationPath = "./recording.mp4";
 
-    @Parameter(names = {"-t", "-time"}, description = "Duration of the recording in minutes. Pass -1 for continuous recording.")
+    @Parameter(names = {"-d", "--duration"}, description = "Duration of the recording in minutes. Pass -1 for continuous recording.")
     private Integer recordingTime = -1;
 
 
     public static void main(String[] args) throws VideoRecorderException {
+        log.info("Starting recording app");
         ScreenRecorderCliApp main = new ScreenRecorderCliApp();
         new JCommander(main, args);
         main.run();
