@@ -1,4 +1,4 @@
-package tdl.record;
+package acceptance;
 
 import com.google.zxing.BarcodeFormat;
 import org.hamcrest.Description;
@@ -31,7 +31,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.greaterThan;
 
-public class RecordAcceptanceTest {
+public class CanRecordVideoTest {
 
     @Test
     @Ignore("Manual acceptance")
@@ -191,6 +191,7 @@ public class RecordAcceptanceTest {
 
         //Check generated files and assert frames contain the right timestamp
     }
+
 
     /**
      * UX: feedback should be collected and displayed on the console ( recording status, size generated, growth rate, size available )

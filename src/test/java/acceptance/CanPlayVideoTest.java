@@ -1,4 +1,4 @@
-package tdl.record;
+package acceptance;
 
 import org.junit.Ignore;
 import org.junit.Test;
@@ -7,7 +7,7 @@ import tdl.record.video.VideoPlayer;
 
 import java.util.concurrent.TimeUnit;
 
-public class PlayerAcceptanceTest {
+public class CanPlayVideoTest {
 
     @Test
     @Ignore("Manual acceptance")

@@ -24,6 +24,7 @@ public class VideoRecorder {
     private Encoder encoder;
     private Rational videoFrameRate;
     private Rational inputFrameRate;
+    private MediaPacket packet;
 
     private VideoRecorder(ImageInput imageInput, TimeSource timeSource,
                           RecorderMetricsCollector recorderMetricsCollector) {
@@ -103,14 +104,26 @@ public class VideoRecorder {
         } catch (InterruptedException | IOException e) {
             throw new VideoRecorderException("Failed to open destination", e);
         }
+
+        // Create the packet to be re-used for encoding
+        packet = MediaPacket.make();
     }
 
     public void record(Duration duration) throws VideoRecorderException {
+        try {
+            doRecord(duration);
+        } catch (Exception e) {
+            throw new VideoRecorderException("Fatal exception while recording", e);
+        } finally {
+            flush();
+        }
+    }
 
-        /*
-          Care must be taken so that the picture is encoded using the same format as Encoder.
-          The images must be converted so that the match.
-         */
+    private void doRecord(Duration duration) throws VideoRecorderException {
+    /*
+      Care must be taken so that the picture is encoded using the same format as Encoder.
+      The images must be converted so that the match.
+     */
         final MediaPicture picture = MediaPicture.make(
                 encoder.getWidth(),
                 encoder.getHeight(),
@@ -120,17 +133,15 @@ public class VideoRecorder {
         try {
             sampleImage = imageInput.getSampleImage();
         } catch (InputImageGenerationException e) {
-            throw new VideoRecorderException("Could not get sample image from input source",e);
+            throw new VideoRecorderException("Could not get sample image from input source", e);
         }
         MediaPictureConverter converter = MediaPictureConverterFactory
                 .createConverter(sampleImage, picture);
-
 
         /*
           One important thing to bare in mind is that the objects are being reused for performance reasons.
           This packet and the picture will be reset whenever we have new data.
          */
-        final MediaPacket packet = MediaPacket.make();
         double totalNumberOfFrames = inputFrameRate.rescale(duration.getSeconds(), Rational.make(1));
         double timeBetweenFramesMillis = inputFrameRate.getValue() * 1000;
         metrics.setExpectedTimeBetweenFrames(timeBetweenFramesMillis, TimeUnit.MILLISECONDS);
@@ -167,21 +178,23 @@ public class VideoRecorder {
                 log.warn("Interrupted while sleeping", e);
             }
         }
-
-        /*
-          Flush the encoder by writing data until we get a new (incomplete) packet
-         */
-        log.info("Flushing remaining frames");
-        do {
-            encoder.encode(packet, null);
-            if (packet.isComplete())
-                muxer.write(packet, false);
-        } while (packet.isComplete());
     }
 
     public void close() {
         log.info("Closing the video stream");
         imageInput.close();
         muxer.close();
+    }
+
+    /*
+      Flush the encoder by writing data until we get a new (incomplete) packet
+     */
+    private void flush() {
+        log.info("Flushing remaining frames");
+        do {
+            encoder.encode(packet, null);
+            if (packet.isComplete())
+                muxer.write(packet, false);
+        } while (packet.isComplete());
     }
 }
