@@ -48,10 +48,6 @@ public class ScreenRecorderCliApp {
         final Thread mainThread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             videoRecorder.stop();
-            if (!mainThread.isInterrupted()) {
-                mainThread.interrupt();
-            }
-
             try {
                 mainThread.join();
             } catch (InterruptedException e) {
