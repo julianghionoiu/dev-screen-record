@@ -21,6 +21,7 @@ public class VideoRecorder {
     private final ImageInput imageInput;
     private final TimeSource timeSource;
     private final RecorderMetricsCollector metrics;
+    private long fragmentationMicros;
     private Muxer muxer;
     private Encoder encoder;
     private Rational videoFrameRate;
@@ -28,22 +29,27 @@ public class VideoRecorder {
     private MediaPacket packet;
     private final AtomicBoolean shouldStopJob = new AtomicBoolean(false);
 
-    private VideoRecorder(ImageInput imageInput, TimeSource timeSource,
-                          RecorderMetricsCollector recorderMetricsCollector) {
+    private VideoRecorder(ImageInput imageInput,
+                          TimeSource timeSource,
+                          RecorderMetricsCollector recorderMetricsCollector, long bFragmentationMicros) {
         this.imageInput = imageInput;
         this.timeSource = timeSource;
         this.metrics = recorderMetricsCollector;
+        this.fragmentationMicros = bFragmentationMicros;
     }
 
+    @SuppressWarnings("SameParameterValue")
     public static class Builder {
         private final ImageInput bImageInput;
         private TimeSource bTimeSource;
         private RecorderMetricsCollector bMetrics;
+        private long bFragmentationMicros;
 
         public Builder(ImageInput imageInput) {
             bImageInput = imageInput;
             bTimeSource = new SystemTimeSource();
             bMetrics = new RecorderMetricsCollector();
+            bFragmentationMicros = TimeUnit.MINUTES.toMicros(5);
         }
 
         public Builder withTimeSource(TimeSource timeSource) {
@@ -56,8 +62,13 @@ public class VideoRecorder {
             return this;
         }
 
+        public Builder withFragmentation(int fragmentation, TimeUnit timeUnit) {
+            this.bFragmentationMicros = timeUnit.toMicros(fragmentation);
+            return this;
+        }
+
         public VideoRecorder build() {
-            return new VideoRecorder(bImageInput, bTimeSource, bMetrics);
+            return new VideoRecorder(bImageInput, bTimeSource, bMetrics, bFragmentationMicros);
         }
     }
 
@@ -79,36 +90,64 @@ public class VideoRecorder {
         }
 
         // A muxer is responsible for combining multiple streams (video, audio, subtitle)
-        muxer = Muxer.make(filename, null, null);
-
-        // We are using the default format, which right on OSX defaults to CODEC_ID_H264
-        // WARNING! The coded selection is system dependent and will use JNI to retrieve the local codec
-        final MuxerFormat format = muxer.getFormat();
-        final Codec codec = Codec.findEncodingCodec(format.getDefaultVideoCodecId());
+        muxer = createMP4MuxerWithFragmentation(filename, fragmentationMicros);
 
         // An encoder is responsible for putting together all the frames from one stream
-        encoder = Encoder.make(codec);
+        encoder = Encoder.make(getMP4Codec());
         encoder.setWidth(imageInput.getWidth());
         encoder.setHeight(imageInput.getHeight());
         encoder.setPixelFormat(PixelFormat.Type.PIX_FMT_YUV420P);
         encoder.setTimeBase(videoFrameRate);
 
         // For extra safety, some formats need global rather than per-stream headers
-        if (muxer.getFormat().getFlag(MuxerFormat.Flag.GLOBAL_HEADER)) {
+        if (this.muxer.getFormat().getFlag(MuxerFormat.Flag.GLOBAL_HEADER)) {
             encoder.setFlag(Encoder.Flag.FLAG_GLOBAL_HEADER, true);
         }
 
         // Open the stream and the muxer
         encoder.open(null, null);
-        muxer.addNewStream(encoder);
+        this.muxer.addNewStream(encoder);
         try {
-            muxer.open(null, null);
+            this.muxer.open(null, null);
         } catch (InterruptedException | IOException e) {
             throw new VideoRecorderException("Failed to open destination", e);
         }
 
         // Create the packet to be re-used for encoding
         packet = MediaPacket.make();
+    }
+
+    /**
+     * The mov/mp4/ismv muxer supports fragmentation. Normally, a MOV/MP4
+     * file has all the metadata about all packets stored in one location at the end.
+     * A fragmented file consists of a number of fragments, where packets and metadata
+     * about these packets are stored together. Writing a fragmented
+     * file has the advantage that the file is decodable even if the
+     * writing is interrupted (while a normal MOV/MP4 is undecodable if
+     * it is not properly finished), and it requires less memory when writing
+     * very long files (since writing normal MOV/MP4 files stores info about
+     * every single packet in memory until the file is closed). The downside
+     * is that it is less compatible with other applications.*
+     *
+     * We are going to enable fragmentation, this will write moof/mdat pairs:
+     * -movflags frag_keyframe*
+     *
+     * We are going to split the fragment by duration:
+     * -frag_duration @var{duration}
+     * Create fragments that are @var{duration} microseconds long.*
+     */
+    private static Muxer createMP4MuxerWithFragmentation(String filename, long fragmentationMicros) {
+        Muxer muxer = Muxer.make(filename, null, "mp4");
+        muxer.setProperty("movflags", "frag_keyframe");
+        muxer.setProperty("frag_duration", fragmentationMicros);
+        return muxer;
+    }
+
+    private static Codec getMP4Codec() {
+        // We are using the default format, which right on OSX defaults to CODEC_ID_H264
+        // WARNING! The coded selection is system dependent and will use JNI to retrieve the local codec
+        final MuxerFormat format = MuxerFormat.guessFormat("mp4", null, null);
+        return Codec.findEncodingCodec(format.getDefaultVideoCodecId());
     }
 
     public void start(Duration duration) throws VideoRecorderException {

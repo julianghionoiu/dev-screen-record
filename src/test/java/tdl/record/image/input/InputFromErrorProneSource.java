@@ -2,11 +2,11 @@ package tdl.record.image.input;
 
 import java.awt.image.BufferedImage;
 
-public class InputFromFaultySource implements ImageInput {
+public class InputFromErrorProneSource implements ImageInput {
     private final ImageInput wrappedImageInput;
     private int countToError;
 
-    public InputFromFaultySource(int countToError, ImageInput wrappedImageInput) {
+    public InputFromErrorProneSource(int countToError, ImageInput wrappedImageInput) {
         this.wrappedImageInput = wrappedImageInput;
         this.countToError = countToError;
     }
