@@ -12,6 +12,8 @@ import tdl.record.time.TimeSource;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -116,7 +118,7 @@ public class VideoRecorder {
         //create *.lock file
         Path lockFilePath = Paths.get(filename + ".lock");
         try {
-            Files.write(lockFilePath, new byte[0], CREATE);
+            Files.write(lockFilePath, getPID().getBytes(), CREATE);
 
             this.muxer.open(null, null);
         } catch (InterruptedException | IOException e) {
@@ -125,6 +127,17 @@ public class VideoRecorder {
 
         // Create the packet to be re-used for encoding
         packet = MediaPacket.make();
+    }
+
+    private String getPID() {
+        RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+        String runtimeName = runtimeMXBean.getName();
+        int endIndex = runtimeName.indexOf('@');
+        if (endIndex < 1) {
+            return "0";
+        } else {
+            return runtimeName.substring(0, endIndex);
+        }
     }
 
     /**
