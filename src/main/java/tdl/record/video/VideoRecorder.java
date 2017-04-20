@@ -12,9 +12,16 @@ import tdl.record.time.TimeSource;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static java.nio.file.StandardOpenOption.CREATE;
 
 @Slf4j
 public class VideoRecorder {
@@ -107,7 +114,12 @@ public class VideoRecorder {
         // Open the stream and the muxer
         encoder.open(null, null);
         this.muxer.addNewStream(encoder);
+
+        //create *.lock file
+        Path lockFilePath = Paths.get(filename + ".lock");
         try {
+            Files.write(lockFilePath, getPID().getBytes(), CREATE);
+
             this.muxer.open(null, null);
         } catch (InterruptedException | IOException e) {
             throw new VideoRecorderException("Failed to open destination", e);
@@ -115,6 +127,17 @@ public class VideoRecorder {
 
         // Create the packet to be re-used for encoding
         packet = MediaPacket.make();
+    }
+
+    private String getPID() {
+        RuntimeMXBean runtimeMXBean = ManagementFactory.getRuntimeMXBean();
+        String runtimeName = runtimeMXBean.getName();
+        int endIndex = runtimeName.indexOf('@');
+        if (endIndex < 1) {
+            return "0";
+        } else {
+            return runtimeName.substring(0, endIndex);
+        }
     }
 
     /**
@@ -233,9 +256,16 @@ public class VideoRecorder {
 
 
     public void close() {
-        log.info("Closing the video stream");
-        imageInput.close();
-        muxer.close();
+        try {
+            log.info("Closing the video stream");
+            imageInput.close();
+            muxer.close();
+            //delete lock file after closing writing
+            Path lockFilePath = Paths.get(muxer.getURL() + ".lock");
+            Files.delete(lockFilePath);
+        } catch (IOException e) {
+            throw new RuntimeException("Can't delete *.lock file.", e);
+        }
     }
 
     /*

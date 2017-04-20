@@ -18,8 +18,11 @@ import tdl.record.video.VideoPlayer;
 import tdl.record.video.VideoRecorder;
 
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +33,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.greaterThan;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class CanRecordVideoTest {
 
@@ -178,6 +183,39 @@ public class CanRecordVideoTest {
                 ", processingRatio = "+metricsHighFramerate.getProcessingRatio()+
                 ", coefficient = "+highCoefficient);
         assertThat(lowCoefficient, closeTo(highCoefficient, 1));
+    }
+
+    @Test
+    public void lock_file_should_be_created_before_starting_recording_and_deleted_after_ending() throws Exception {
+        String destinationVideo = "build/recording_from_barcode_at_4x.mp4";
+        TimeSource recordTimeSource = new FakeTimeSource();
+        ImageInput imageInput = new InputFromStreamOfBarcodes(BarcodeFormat.CODE_39, 300, 150, recordTimeSource);
+        VideoRecorder videoRecorder = new VideoRecorder.Builder(imageInput).withTimeSource(recordTimeSource).build();
+
+        Path videoFilePath = Paths.get(destinationVideo);
+        Path lockFilePath = Paths.get(destinationVideo + ".lock");
+        //delete files if exist before start
+        Files.deleteIfExists(lockFilePath);
+        Files.deleteIfExists(videoFilePath);
+        assertFalse(Files.exists(lockFilePath));
+        assertFalse(Files.exists(videoFilePath));
+
+        // Capture video
+        videoRecorder.open(destinationVideo, 5, 4);
+        //check that lock file created
+        assertTrue(Files.exists(lockFilePath));
+        //assert that lock file is older than video file
+        BasicFileAttributes lockFileAttributes = Files.readAttributes(lockFilePath, BasicFileAttributes.class);
+        BasicFileAttributes videoFileAttributes = Files.readAttributes(videoFilePath, BasicFileAttributes.class);
+        Instant lockFileCreatingTime = lockFileAttributes.creationTime().toInstant();
+        Instant videoFileCreatingTime = videoFileAttributes.creationTime().toInstant();
+        assertTrue(lockFileCreatingTime.isBefore(videoFileCreatingTime) || lockFileCreatingTime.equals(videoFileCreatingTime));
+
+        //write video
+        videoRecorder.start(Duration.of(12, ChronoUnit.SECONDS));
+        videoRecorder.close();
+        //check that lock file deleted
+        assertFalse(Files.exists(lockFilePath));
     }
 
     /**
