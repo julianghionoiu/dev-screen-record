@@ -5,12 +5,15 @@ import com.beust.jcommander.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import tdl.record.image.input.InputFromScreen;
 import tdl.record.image.input.ScaleToOptimalSizeImage;
+import tdl.record.metrics.RecordingMetricsCollector;
 import tdl.record.utils.ImageQualityHint;
 import tdl.record.video.VideoRecorder;
 import tdl.record.video.VideoRecorderException;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Timer;
+import java.util.TimerTask;
 
 @Slf4j
 public class ScreenRecorderCliApp {
@@ -33,20 +36,37 @@ public class ScreenRecorderCliApp {
             throw new IllegalArgumentException("Continuous recording not implemented");
         }
 
-        //TODO Display a status message every minute so that the user gets feedback on the recording
+        RecordingMetricsCollector recordingMetricsCollector = new RecordingMetricsCollector();
         VideoRecorder videoRecorder = new VideoRecorder
                 .Builder(new ScaleToOptimalSizeImage(ImageQualityHint.MEDIUM, new InputFromScreen()))
+                .withRecordingListener(recordingMetricsCollector)
                 .build();
-        registerShutdownHook(videoRecorder);
+
+        //Issue performance updates
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                System.out.println("Recorded "+recordingMetricsCollector.getTotalFrames() + " frames"
+                        +" at "+ recordingMetricsCollector.getVideoFrameRate().getDenominator() + " fps"
+                        +" with a load of " + recordingMetricsCollector.getRenderingTimeRatio());
+            }
+        }, 0, 5000);
+
+        registerShutdownHook(videoRecorder, timer);
+
 
         videoRecorder.open(destinationPath, 4, 4);
         videoRecorder.start(Duration.of(recordingTime, ChronoUnit.MINUTES));
         videoRecorder.close();
+        timer.cancel();
     }
 
-    private void registerShutdownHook(final VideoRecorder videoRecorder) {
+
+    private void registerShutdownHook(final VideoRecorder videoRecorder, Timer timer) {
         final Thread mainThread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            timer.cancel();
             videoRecorder.stop();
             try {
                 mainThread.join();

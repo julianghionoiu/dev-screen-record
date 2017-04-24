@@ -6,5 +6,5 @@ Java command line tool to record a programming session
 
 ```
 ./gradlew mavenCapsule
-java -jar ./build/libs/dev-screen-record-1.0-SNAPSHOT-capsule.jar --duration 1
+java -jar ./build/libs/dev-screen-record-1.0-SNAPSHOT-capsule.jar --duration 1 --output ./recording.mp4
 ```

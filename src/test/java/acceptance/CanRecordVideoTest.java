@@ -9,7 +9,8 @@ import org.junit.Test;
 import tdl.record.image.input.*;
 import tdl.record.image.output.OutputToBarcodeReader;
 import tdl.record.image.output.OutputToInMemoryBuffer;
-import tdl.record.metrics.RecorderMetricsCollector;
+import tdl.record.metrics.RecordingMetricsCollector;
+import tdl.record.metrics.RecordingListener;
 import tdl.record.time.FakeTimeSource;
 import tdl.record.time.SystemTimeSource;
 import tdl.record.time.TimeSource;
@@ -124,11 +125,11 @@ public class CanRecordVideoTest {
 
         ImageInput imageInput = new ScaleToOptimalSizeImage(ImageQualityHint.LOW,
                 new InputFromStaticImage(referenceImage));
-        RecorderMetricsCollector metrics = new RecorderMetricsCollector();
+        RecordingListener metrics = new RecordingMetricsCollector();
 
         VideoRecorder videoRecorder = new VideoRecorder.Builder(imageInput)
                 .withTimeSource(new SystemTimeSource())
-                .withMetricsCollector(metrics)
+                .withRecordingListener(metrics)
                 .build();
         videoRecorder.open(destinationVideoFile, 10, 4);
         videoRecorder.start(Duration.of(1, ChronoUnit.SECONDS));
@@ -149,12 +150,12 @@ public class CanRecordVideoTest {
     public void test_measure_recording_performance() throws Exception {
         //Record first video
         int lowRateSnapsPerSecond = 2;
-        RecorderMetricsCollector metricsLowFramerate = new RecorderMetricsCollector();
+        RecordingMetricsCollector metricsForLowFramerate = new RecordingMetricsCollector();
         {
             String destinationVideoFile = "build/recording_for_metrics1.mp4";
             ImageInput imageInput = new ScaleToOptimalSizeImage(ImageQualityHint.LOW, new InputFromScreen());
             VideoRecorder videoRecorder = new VideoRecorder.Builder(imageInput)
-                    .withMetricsCollector(metricsLowFramerate).build();
+                    .withRecordingListener(metricsForLowFramerate).build();
             videoRecorder.open(destinationVideoFile, lowRateSnapsPerSecond, 4);
             videoRecorder.start(Duration.of(1, ChronoUnit.SECONDS));
             videoRecorder.close();
@@ -162,27 +163,27 @@ public class CanRecordVideoTest {
 
         //Record second video
         int highRateSnapsPerSecond = 4;
-        RecorderMetricsCollector metricsHighFramerate = new RecorderMetricsCollector();
+        RecordingMetricsCollector metricsForHighFramerate = new RecordingMetricsCollector();
         {
             String destinationVideoFile = "build/recording_for_metrics2.mp4";
             ImageInput imageInput = new ScaleToOptimalSizeImage(ImageQualityHint.LOW, new InputFromScreen());
             VideoRecorder videoRecorder = new VideoRecorder.Builder(imageInput)
-                    .withMetricsCollector(metricsHighFramerate).build();
+                    .withRecordingListener(metricsForHighFramerate).build();
             videoRecorder.open(destinationVideoFile, highRateSnapsPerSecond, 4);
             videoRecorder.start(Duration.of(1, ChronoUnit.SECONDS));
             videoRecorder.close();
         }
 
         //Assert on performance metrics
-        double lowCoefficient = lowRateSnapsPerSecond / metricsLowFramerate.getProcessingRatio();
+        double maxSnapsPerSecond1 = lowRateSnapsPerSecond / metricsForLowFramerate.getRenderingTimeRatio();
         System.out.println("snapsPerSecond:"+lowRateSnapsPerSecond+
-                ", processingRatio = "+metricsLowFramerate.getProcessingRatio()+
-                ", coefficient = "+lowCoefficient);
-        double highCoefficient = highRateSnapsPerSecond / metricsHighFramerate.getProcessingRatio();
+                ", renderingTimeRatio = "+metricsForLowFramerate.getRenderingTimeRatio()+
+                ", maxSnapsPerSecond = "+maxSnapsPerSecond1);
+        double maxSnapsPerSecond2 = highRateSnapsPerSecond / metricsForHighFramerate.getRenderingTimeRatio();
         System.out.println("snapsPerSecond:"+highRateSnapsPerSecond+
-                ", processingRatio = "+metricsHighFramerate.getProcessingRatio()+
-                ", coefficient = "+highCoefficient);
-        assertThat(lowCoefficient, closeTo(highCoefficient, 1));
+                ", renderingTimeRatio = "+metricsForHighFramerate.getRenderingTimeRatio()+
+                ", maxSnapsPerSecond = "+maxSnapsPerSecond2);
+        assertThat(maxSnapsPerSecond1, closeTo(maxSnapsPerSecond2, 1.5));
     }
 
     @Test

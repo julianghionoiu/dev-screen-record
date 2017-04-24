@@ -6,7 +6,8 @@ import io.humble.video.awt.MediaPictureConverterFactory;
 import lombok.extern.slf4j.Slf4j;
 import tdl.record.image.input.ImageInput;
 import tdl.record.image.input.InputImageGenerationException;
-import tdl.record.metrics.RecorderMetricsCollector;
+import tdl.record.metrics.RecordingMetricsCollector;
+import tdl.record.metrics.RecordingListener;
 import tdl.record.time.SystemTimeSource;
 import tdl.record.time.TimeSource;
 
@@ -25,7 +26,7 @@ import static java.nio.file.StandardOpenOption.CREATE;
 public class VideoRecorder {
     private final ImageInput imageInput;
     private final TimeSource timeSource;
-    private final RecorderMetricsCollector metrics;
+    private final RecordingListener recordingListener;
     private long fragmentationMicros;
     private Muxer muxer;
     private Encoder encoder;
@@ -36,10 +37,10 @@ public class VideoRecorder {
 
     private VideoRecorder(ImageInput imageInput,
                           TimeSource timeSource,
-                          RecorderMetricsCollector recorderMetricsCollector, long bFragmentationMicros) {
+                          RecordingListener recordingListener, long bFragmentationMicros) {
         this.imageInput = imageInput;
         this.timeSource = timeSource;
-        this.metrics = recorderMetricsCollector;
+        this.recordingListener = recordingListener;
         this.fragmentationMicros = bFragmentationMicros;
     }
 
@@ -47,13 +48,13 @@ public class VideoRecorder {
     public static class Builder {
         private final ImageInput bImageInput;
         private TimeSource bTimeSource;
-        private RecorderMetricsCollector bMetrics;
+        private RecordingListener bRecordingListener;
         private long bFragmentationMicros;
 
         public Builder(ImageInput imageInput) {
             bImageInput = imageInput;
             bTimeSource = new SystemTimeSource();
-            bMetrics = new RecorderMetricsCollector();
+            bRecordingListener = new RecordingMetricsCollector();
             bFragmentationMicros = TimeUnit.MINUTES.toMicros(5);
         }
 
@@ -62,8 +63,8 @@ public class VideoRecorder {
             return this;
         }
 
-        public Builder withMetricsCollector(RecorderMetricsCollector metricsCollector) {
-            this.bMetrics = metricsCollector;
+        public Builder withRecordingListener(RecordingListener recordingListener) {
+            this.bRecordingListener = recordingListener;
             return this;
         }
 
@@ -73,7 +74,7 @@ public class VideoRecorder {
         }
 
         public VideoRecorder build() {
-            return new VideoRecorder(bImageInput, bTimeSource, bMetrics, bFragmentationMicros);
+            return new VideoRecorder(bImageInput, bTimeSource, bRecordingListener, bFragmentationMicros);
         }
     }
 
@@ -85,6 +86,7 @@ public class VideoRecorder {
          */
         inputFrameRate = Rational.make(1, snapsPerSecond);
         videoFrameRate = Rational.make(1, timeSpeedUpFactor * snapsPerSecond);
+        recordingListener.setFrameRates(inputFrameRate, videoFrameRate);
 
         // Prime the image input
         log.info("Open the input stream");
@@ -195,10 +197,9 @@ public class VideoRecorder {
          */
         double totalNumberOfFrames = inputFrameRate.rescale(duration.getSeconds(), Rational.make(1));
         double timeBetweenFramesMillis = inputFrameRate.getValue() * 1000;
-        metrics.setExpectedTimeBetweenFrames(timeBetweenFramesMillis, TimeUnit.MILLISECONDS);
         for (long frameIndex = 0; frameIndex < totalNumberOfFrames; frameIndex++) {
             long timestampBeforeProcessing = timeSource.currentTimeNano();
-            metrics.notifyFrameStartAt(timestampBeforeProcessing, TimeUnit.NANOSECONDS, frameIndex);
+            recordingListener.notifyFrameRenderingStarts(timestampBeforeProcessing, TimeUnit.NANOSECONDS, frameIndex);
 
             final BufferedImage screen;
             try {
@@ -221,7 +222,7 @@ public class VideoRecorder {
               With recordings, the biggest challenge is to maintain the requested frameRate.
               We need to trigger the read the next image at exactly the right time.
              */
-            metrics.notifyFrameEndAt(timeSource.currentTimeNano(), TimeUnit.NANOSECONDS, frameIndex);
+            recordingListener.notifyFrameRenderingEnds(timeSource.currentTimeNano(), TimeUnit.NANOSECONDS, frameIndex);
             long nextTimestamp = timestampBeforeProcessing + TimeUnit.MILLISECONDS.toNanos((long) timeBetweenFramesMillis);
             try {
                 timeSource.wakeUpAt(nextTimestamp, TimeUnit.NANOSECONDS);
