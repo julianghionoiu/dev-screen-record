@@ -5,9 +5,11 @@
 Library designed for recording programming sessions.
 The video generated is a MP4 file enabled for streaming. (Fragmented MP4, 5 min fragments)
 
+## To use as a library
+
 ### Add as Maven dependency
 
-//TODO
+**TODO** Add maven block
 
 The library uses `humble-video` which wraps `ffmpeg`. You need to include the binary for your platform
 ```properties
@@ -19,6 +21,11 @@ linux-x86:    io.humble:humble-video-arch-x86_64-pc-linux-gnu6:0.2.1
 linux-i686:   io.humble:humble-video-arch-i686-pc-linux-gnu6:0.2.1
 ```
 
+### Configure Input and Output source
+
+**TODO** Add examples
+
+## Development
 
 ### Build and run as command-line app
 
