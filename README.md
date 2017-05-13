@@ -13,7 +13,7 @@ The video generated is a MP4 file enabled for streaming. (Fragmented MP4, 5 min 
 Add a dependency to `tdl:dev-screen-record` in `compile` scope. See top of README for latest release.
 ```xml
 <dependency>
-  <groupId>tdl</groupId>
+  <groupId>ro.ghionoiu</groupId>
   <artifactId>dev-screen-record</artifactId>
   <version>X.Y.Z</version>
 </dependency>
@@ -50,4 +50,15 @@ This will grate a maven based Jar that will download the required dependencies b
 ```
 ./gradlew mavenCapsule
 java -jar ./build/libs/dev-screen-record-1.0-SNAPSHOT-capsule.jar --duration 1 --output ./recording.mp4
+```
+
+### To release
+
+The CI server is configured to pushs release branches to Bintray.
+You trigger the process by running the `release` command locally. 
+
+The command will increment the release number and create and annotated tag:
+```bash
+./gradlew release
+git push --tags
 ```
