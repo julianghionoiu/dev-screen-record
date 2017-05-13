@@ -10,7 +10,7 @@ The video generated is a MP4 file enabled for streaming. (Fragmented MP4, 5 min 
 
 ### Add as Maven dependency
 
-Add a dependency to `tdl:dev-screen-record` in `compile` scope. See top of README for latest release.
+Add a dependency to `tdl:dev-screen-record` in `compile` scope. See `bintray` shield for latest release number.
 ```xml
 <dependency>
   <groupId>ro.ghionoiu</groupId>

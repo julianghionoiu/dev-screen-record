@@ -147,6 +147,9 @@ public class VideoRecorder {
      * We are going to split the fragment by duration:
      * -frag_duration @var{duration}
      * Create fragments that are @var{duration} microseconds long.*
+     *
+     * To inspect the moov atoms you can use:
+     *  qtfaststart -l recording.mp4
      */
     private static Muxer createMP4MuxerWithFragmentation(String filename, long fragmentationMicros) {
         Muxer muxer = Muxer.make(filename, null, "mp4");

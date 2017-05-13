@@ -75,6 +75,7 @@ task mavenCapsule(type: MavenCapsule){
     applicationClass mainClassName
 
     capsuleManifest {
+        minJavaVersion = '1.8.0'
         dependencyConfiguration configurations.compile
 
         //noinspection GroovyAssignabilityCheck
