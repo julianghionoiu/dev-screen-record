@@ -38,9 +38,61 @@ Example:
 </dependency>
 ```
 
-### Configure Input and Output source
+### Usage
 
-**TODO** Add examples
+The following example records the screen for 1 minute at 4 snapshots per second. 
+The final video is speed up by a factor of 4 resulting in 16 frames per second.
+
+```java
+        String destinationPath = "./recording/mp4";
+        VideoRecorder videoRecorder = new VideoRecorder
+                .Builder(new ScaleToOptimalSizeImage(ImageQualityHint.MEDIUM, new InputFromScreen()))
+                .build();
+
+
+        int snapsPerSecond = 4;
+        int timeSpeedUpFactor = 4;
+        videoRecorder.open(destinationPath, snapsPerSecond, timeSpeedUpFactor);
+        videoRecorder.start(Duration.of(1, ChronoUnit.MINUTES)); //Will block
+        videoRecorder.close();
+```
+
+To monitor the **recording progress** you register a `RecordingListener`. 
+The following example displays the metrics to the screen every 5 seconds:
+
+```java
+        RecordingMetricsCollector recordingMetricsCollector = new RecordingMetricsCollector();
+        VideoRecorder videoRecorder = new VideoRecorder
+                .Builder(new ScaleToOptimalSizeImage(ImageQualityHint.MEDIUM, new InputFromScreen()))
+                .withRecordingListener(recordingMetricsCollector)
+                .build();
+        
+        //Issue performance updates
+        Timer timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                System.out.println("Recorded "+recordingMetricsCollector.getTotalFrames() + " frames"
+                        +" at "+ recordingMetricsCollector.getVideoFrameRate().getDenominator() + " fps"
+                        +" with a load of " + recordingMetricsCollector.getRenderingTimeRatio());
+            }
+        }, 0, 5000);
+```
+
+To **gracefully stop the recording** you must ensure that you call the `stop()` on the recording.
+You do this by registering `shutdownHook`:
+```java
+        final Thread mainThread = Thread.currentThread();
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            videoRecorder.stop();
+            try {
+                mainThread.join();
+            } catch (InterruptedException e) {
+                log.warn("Could not join main thread", e);
+            }
+        }));
+```
+
 
 ## Development
 
