@@ -101,7 +101,8 @@ You do this by registering `shutdownHook`:
 This will grate a maven based Jar that will download the required dependencies before running the app:
 ```
 ./gradlew mavenCapsule
-java -jar ./build/libs/dev-screen-record-1.0-SNAPSHOT-capsule.jar --duration 1 --output ./recording.mp4
+java -Dlogback.configurationFile=`pwd`/logback.xml \
+    -jar ./build/libs/dev-screen-record-1.0-SNAPSHOT-capsule.jar --duration 1 --output ./recording.mp4
 ```
 
 ### Install to mavenLocal
