@@ -52,7 +52,14 @@ This will grate a maven based Jar that will download the required dependencies b
 java -jar ./build/libs/dev-screen-record-1.0-SNAPSHOT-capsule.jar --duration 1 --output ./recording.mp4
 ```
 
-### To release
+### Install to mavenLocal
+
+If you want to build the SNAPSHOT version locally you can install to the local Maven cache
+```
+./gradlew -x test install
+```
+
+### Release to jcenter and mavenCentral
 
 The CI server is configured to pushs release branches to Bintray.
 You trigger the process by running the `release` command locally. 
