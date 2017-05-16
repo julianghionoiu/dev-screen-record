@@ -33,6 +33,7 @@ public class VideoRecorder {
     private Rational videoFrameRate;
     private Rational inputFrameRate;
     private MediaPacket packet;
+    private String destinationFilename;
     private final AtomicBoolean shouldStopJob = new AtomicBoolean(false);
 
     private VideoRecorder(ImageInput imageInput,
@@ -79,6 +80,8 @@ public class VideoRecorder {
     }
 
     public void open(String filename, int snapsPerSecond, int timeSpeedUpFactor) throws VideoRecorderException {
+        destinationFilename = filename;
+
         /*
            With videos it is all about timing.
            We need to keep two frames of reference, one for the input and one for the output (video)
@@ -86,7 +89,7 @@ public class VideoRecorder {
          */
         inputFrameRate = Rational.make(1, snapsPerSecond);
         videoFrameRate = Rational.make(1, timeSpeedUpFactor * snapsPerSecond);
-        recordingListener.setFrameRates(inputFrameRate, videoFrameRate);
+
 
         // Prime the image input
         log.info("Open the input stream");
@@ -151,8 +154,8 @@ public class VideoRecorder {
      * To inspect the moov atoms you can use:
      *  qtfaststart -l recording.mp4
      */
-    private static Muxer createMP4MuxerWithFragmentation(String filename, long fragmentationMicros) {
-        Muxer muxer = Muxer.make(filename, null, "mp4");
+    private static Muxer createMP4MuxerWithFragmentation(String destinationFilename, long fragmentationMicros) {
+        Muxer muxer = Muxer.make(destinationFilename, null, "mp4");
         muxer.setProperty("movflags", "frag_keyframe");
         muxer.setProperty("frag_duration", fragmentationMicros);
         return muxer;
@@ -167,19 +170,21 @@ public class VideoRecorder {
 
     public void start(Duration duration) throws VideoRecorderException {
         try {
+            recordingListener.notifyRecordingStart(destinationFilename, inputFrameRate, videoFrameRate);
             doRecord(duration);
         } catch (RuntimeException e) {
             throw new VideoRecorderException("Fatal exception while recording", e);
         } finally {
             flush();
+            recordingListener.notifyRecordingEnd();
         }
     }
 
     private void doRecord(Duration duration) throws VideoRecorderException {
-    /*
-      Care must be taken so that the picture is encoded using the same format as Encoder.
-      The images must be converted so that the match.
-     */
+        /*
+          Care must be taken so that the picture is encoded using the same format as Encoder.
+          The images must be converted so that the match.
+         */
         final MediaPicture picture = MediaPicture.make(
                 encoder.getWidth(),
                 encoder.getHeight(),
@@ -202,7 +207,7 @@ public class VideoRecorder {
         double timeBetweenFramesMillis = inputFrameRate.getValue() * 1000;
         for (long frameIndex = 0; frameIndex < totalNumberOfFrames; frameIndex++) {
             long timestampBeforeProcessing = timeSource.currentTimeNano();
-            recordingListener.notifyFrameRenderingStarts(timestampBeforeProcessing, TimeUnit.NANOSECONDS, frameIndex);
+            recordingListener.notifyFrameRenderingStart(timestampBeforeProcessing, TimeUnit.NANOSECONDS, frameIndex);
 
             final BufferedImage screen;
             try {
@@ -225,7 +230,7 @@ public class VideoRecorder {
               With recordings, the biggest challenge is to maintain the requested frameRate.
               We need to trigger the read the next image at exactly the right time.
              */
-            recordingListener.notifyFrameRenderingEnds(timeSource.currentTimeNano(), TimeUnit.NANOSECONDS, frameIndex);
+            recordingListener.notifyFrameRenderingEnd(timeSource.currentTimeNano(), TimeUnit.NANOSECONDS, frameIndex);
             long nextTimestamp = timestampBeforeProcessing + TimeUnit.MILLISECONDS.toNanos((long) timeBetweenFramesMillis);
             try {
                 timeSource.wakeUpAt(nextTimestamp, TimeUnit.NANOSECONDS);

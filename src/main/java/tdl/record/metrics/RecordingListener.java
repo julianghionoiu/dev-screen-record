@@ -6,9 +6,11 @@ import java.util.concurrent.TimeUnit;
 
 public interface RecordingListener {
 
-    void setFrameRates(Rational inputFrameRate, Rational videoFrameRate);
+    void notifyRecordingStart(String destinationFilename, Rational inputFrameRate, Rational videoFrameRate);
 
-    void notifyFrameRenderingStarts(long timestamp, TimeUnit unit, long frameIndex);
+    void notifyFrameRenderingStart(long timestamp, TimeUnit unit, long frameIndex);
 
-    void notifyFrameRenderingEnds(long timestamp, TimeUnit unit, long frameIndex);
+    void notifyFrameRenderingEnd(long timestamp, TimeUnit unit, long frameIndex);
+
+    void notifyRecordingEnd();
 }
