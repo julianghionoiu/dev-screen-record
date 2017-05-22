@@ -1,7 +1,8 @@
 [![Java Version](http://img.shields.io/badge/Java-1.8-blue.svg)](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html)
-[![Latest release](https://img.shields.io/bintray/v/julianghionoiu/maven/dev-screen-record.svg)](https://bintray.com/julianghionoiu/maven/dev-screen-record/_latestVersion)
+[![Download](https://api.bintray.com/packages/julianghionoiu/maven/dev-screen-record/images/download.svg)](https://bintray.com/julianghionoiu/maven/dev-screen-record/_latestVersion)
 [![Codeship Status for julianghionoiu/dev-screen-record](https://img.shields.io/codeship/dcd3e060-eb2a-0134-19b1-12840b09bc35/master.svg)](https://codeship.com/projects/207991)
 [![Coverage Status](https://coveralls.io/repos/github/julianghionoiu/dev-screen-record/badge.svg?branch=master)](https://coveralls.io/github/julianghionoiu/dev-screen-record?branch=master)
+
 
 Library designed for recording programming sessions.
 The video generated is a MP4 file enabled for streaming. (Fragmented MP4, 5 min fragments)
