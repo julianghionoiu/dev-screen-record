@@ -2,8 +2,8 @@ package acceptance;
 
 import org.junit.Ignore;
 import org.junit.Test;
-import tdl.record.image.output.OutputToScreen;
-import tdl.record.video.VideoPlayer;
+import tdl.record.screen.image.output.OutputToScreen;
+import tdl.record.screen.video.VideoPlayer;
 
 import java.util.concurrent.TimeUnit;
 
