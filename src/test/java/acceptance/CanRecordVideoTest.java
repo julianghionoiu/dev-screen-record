@@ -225,10 +225,7 @@ public class CanRecordVideoTest {
     @Test
     @Ignore("Not implemented")
     public void video_should_be_broken_down_into_discrete_packets_to_help_with_upload() throws Exception {
-        //TODO Before doing this, play a spike. What is the best way to upload a file?
-        //TODO One big file + Multipart, or multiple small files.
-
-        //Check generated files and assert frames contain the right timestamp
+        //TODO Generate video, truncate some bytes at the end, assert that the video is still valid
     }
 
 
@@ -238,16 +235,13 @@ public class CanRecordVideoTest {
     @Test
     @Ignore("Not implemented")
     public void display_processing_feedback_to_the_console() throws Exception {
-
+        //TODO Add a test for data collection
     }
 
-    /**
-     * Add 4x watermark
-     */
     @Test
     @Ignore("Not implemented")
-    public void the_frames_should_contain_a_watermark_with_the_speedup() throws Exception {
-
+    public void can_be_run_as_cli_tool() throws Exception {
+        //TODO Add a test for the CLI tool that starts a recording
     }
 
     //~~~~~~~~~~~~~ Helpers
