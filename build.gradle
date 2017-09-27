@@ -98,7 +98,6 @@ task mavenCapsule(type: MavenCapsule){
 // ~~~~~ Gather coverage
 
 apply plugin: "jacoco"
-apply plugin: "com.github.kt3k.coveralls"
 
 jacocoTestReport {
     reports {
