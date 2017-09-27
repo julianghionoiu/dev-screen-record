@@ -99,7 +99,7 @@ You do this by registering `shutdownHook`:
 
 ### Build and run as command-line app
 
-This will grate a maven based Jar that will download the required dependencies before running the app:
+This will create a maven based Jar that will download the required dependencies before running the app:
 ```
 ./gradlew mavenCapsule
 java -Dlogback.configurationFile=`pwd`/logback.xml \

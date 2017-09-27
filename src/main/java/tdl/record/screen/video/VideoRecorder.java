@@ -246,10 +246,13 @@ public class VideoRecorder {
     }
 
     public void stop() {
-        log.info("Stopping recording");
-        shouldStopJob.set(true);
+        if (!shouldStopJob.get()) {
+            log.info("Stopping recording");
+            shouldStopJob.set(true);
+        } else {
+            log.info("Recording already stopping");
+        }
     }
-
 
     public void close() {
         try {
