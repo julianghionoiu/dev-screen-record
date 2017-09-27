@@ -8,7 +8,7 @@ import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
 @Slf4j
-public class RecordingMetricsCollector implements RecordingListener {
+public class VideoRecordingMetricsCollector implements VideoRecordingListener {
     private long expectedTimeBetweenFramesNanos;
     private long timestampBeforeProcessingNanos;
     private double renderingTimeRatio;
@@ -19,7 +19,7 @@ public class RecordingMetricsCollector implements RecordingListener {
     private boolean isCurrentlyRecording;
 
 
-    public RecordingMetricsCollector() {
+    public VideoRecordingMetricsCollector() {
         expectedTimeBetweenFramesNanos = Long.MAX_VALUE;
         inputFrameRate = Rational.make();
         videoFrameRate = Rational.make();

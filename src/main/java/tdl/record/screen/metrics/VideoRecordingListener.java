@@ -4,7 +4,7 @@ import io.humble.video.Rational;
 
 import java.util.concurrent.TimeUnit;
 
-public interface RecordingListener {
+public interface VideoRecordingListener {
 
     void notifyRecordingStart(String destinationFilename, Rational inputFrameRate, Rational videoFrameRate);
 

@@ -5,7 +5,7 @@ import com.beust.jcommander.Parameter;
 import lombok.extern.slf4j.Slf4j;
 import tdl.record.screen.image.input.InputFromScreen;
 import tdl.record.screen.image.input.ScaleToOptimalSizeImage;
-import tdl.record.screen.metrics.RecordingMetricsCollector;
+import tdl.record.screen.metrics.VideoRecordingMetricsCollector;
 import tdl.record.screen.utils.ImageQualityHint;
 import tdl.record.screen.video.VideoRecorder;
 import tdl.record.screen.video.VideoRecorderException;
@@ -36,10 +36,10 @@ public class ScreenRecorderCliApp {
             throw new IllegalArgumentException("Continuous recording not implemented");
         }
 
-        RecordingMetricsCollector recordingMetricsCollector = new RecordingMetricsCollector();
+        VideoRecordingMetricsCollector videoRecordingMetricsCollector = new VideoRecordingMetricsCollector();
         VideoRecorder videoRecorder = new VideoRecorder
                 .Builder(new ScaleToOptimalSizeImage(ImageQualityHint.MEDIUM, new InputFromScreen()))
-                .withRecordingListener(recordingMetricsCollector)
+                .withRecordingListener(videoRecordingMetricsCollector)
                 .build();
 
         //Issue performance updates
@@ -47,9 +47,9 @@ public class ScreenRecorderCliApp {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                System.out.println("Recorded "+recordingMetricsCollector.getTotalFrames() + " frames"
-                        +" at "+ recordingMetricsCollector.getVideoFrameRate().getDenominator() + " fps"
-                        +" with a load of " + recordingMetricsCollector.getRenderingTimeRatio());
+                System.out.println("Recorded "+ videoRecordingMetricsCollector.getTotalFrames() + " frames"
+                        +" at "+ videoRecordingMetricsCollector.getVideoFrameRate().getDenominator() + " fps"
+                        +" with a load of " + videoRecordingMetricsCollector.getRenderingTimeRatio());
             }
         }, 0, 5000);
 

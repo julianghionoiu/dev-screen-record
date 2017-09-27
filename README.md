@@ -45,7 +45,7 @@ The following example records the screen for 1 minute at 4 snapshots per second.
 The final video is speed up by a factor of 4 resulting in 16 frames per second.
 
 ```java
-        String destinationPath = "./recording/mp4";
+        String destinationPath = "./screen.mp4";
         VideoRecorder videoRecorder = new VideoRecorder
                 .Builder(new ScaleToOptimalSizeImage(ImageQualityHint.MEDIUM, new InputFromScreen()))
                 .build();
@@ -62,10 +62,10 @@ To monitor the **recording progress** you register a `RecordingListener`.
 The following example displays the metrics to the screen every 5 seconds:
 
 ```java
-        RecordingMetricsCollector recordingMetricsCollector = new RecordingMetricsCollector();
+        VideoRecordingMetricsCollector videoRecordingMetricsCollector = new VideoRecordingMetricsCollector();
         VideoRecorder videoRecorder = new VideoRecorder
                 .Builder(new ScaleToOptimalSizeImage(ImageQualityHint.MEDIUM, new InputFromScreen()))
-                .withRecordingListener(recordingMetricsCollector)
+                .withRecordingListener(videoRecordingMetricsCollector)
                 .build();
         
         //Issue performance updates
@@ -73,9 +73,9 @@ The following example displays the metrics to the screen every 5 seconds:
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                System.out.println("Recorded "+recordingMetricsCollector.getTotalFrames() + " frames"
-                        +" at "+ recordingMetricsCollector.getVideoFrameRate().getDenominator() + " fps"
-                        +" with a load of " + recordingMetricsCollector.getRenderingTimeRatio());
+                System.out.println("Recorded "+videoRecordingMetricsCollector.getTotalFrames() + " frames"
+                        +" at "+ videoRecordingMetricsCollector.getVideoFrameRate().getDenominator() + " fps"
+                        +" with a load of " + videoRecordingMetricsCollector.getRenderingTimeRatio());
             }
         }, 0, 5000);
 ```

@@ -9,8 +9,8 @@ import org.junit.Test;
 import tdl.record.screen.image.input.*;
 import tdl.record.screen.image.output.OutputToBarcodeReader;
 import tdl.record.screen.image.output.OutputToInMemoryBuffer;
-import tdl.record.screen.metrics.RecordingMetricsCollector;
-import tdl.record.screen.metrics.RecordingListener;
+import tdl.record.screen.metrics.VideoRecordingMetricsCollector;
+import tdl.record.screen.metrics.VideoRecordingListener;
 import tdl.record.screen.time.FakeTimeSource;
 import tdl.record.screen.time.SystemTimeSource;
 import tdl.record.screen.time.TimeSource;
@@ -125,7 +125,7 @@ public class CanRecordVideoTest {
 
         ImageInput imageInput = new ScaleToOptimalSizeImage(ImageQualityHint.LOW,
                 new InputFromStaticImage(referenceImage));
-        RecordingListener metrics = new RecordingMetricsCollector();
+        VideoRecordingListener metrics = new VideoRecordingMetricsCollector();
 
         VideoRecorder videoRecorder = new VideoRecorder.Builder(imageInput)
                 .withTimeSource(new SystemTimeSource())
@@ -150,7 +150,7 @@ public class CanRecordVideoTest {
     public void test_measure_recording_performance() throws Exception {
         //Record first video
         int lowRateSnapsPerSecond = 2;
-        RecordingMetricsCollector metricsForLowFramerate = new RecordingMetricsCollector();
+        VideoRecordingMetricsCollector metricsForLowFramerate = new VideoRecordingMetricsCollector();
         {
             String destinationVideoFile = "build/recording_for_metrics1.mp4";
             ImageInput imageInput = new ScaleToOptimalSizeImage(ImageQualityHint.LOW, new InputFromScreen());
@@ -163,7 +163,7 @@ public class CanRecordVideoTest {
 
         //Record second video
         int highRateSnapsPerSecond = 4;
-        RecordingMetricsCollector metricsForHighFramerate = new RecordingMetricsCollector();
+        VideoRecordingMetricsCollector metricsForHighFramerate = new VideoRecordingMetricsCollector();
         {
             String destinationVideoFile = "build/recording_for_metrics2.mp4";
             ImageInput imageInput = new ScaleToOptimalSizeImage(ImageQualityHint.LOW, new InputFromScreen());
