@@ -20,9 +20,11 @@ public class InputFromScreen implements ImageInput {
         try {
             //OBS: Robot requires AWTPermission, it might be wise to use a policy file, see http://docs.oracle.com/javase/7/docs/technotes/guides/security/PolicyFiles.html
             //OBS: Robot starts an app called AppMain. What is the deal with it ?
-            Toolkit defaultToolkit = Toolkit.getDefaultToolkit();
             this.robot = new Robot();
-            this.screenBounds = new Rectangle(defaultToolkit.getScreenSize());
+            this.screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment()
+                                                   .getDefaultScreenDevice()
+                                                   .getDefaultConfiguration()
+                                                   .getBounds();
         } catch (AWTException e) {
             throw new InputImageGenerationException(e);
         }
