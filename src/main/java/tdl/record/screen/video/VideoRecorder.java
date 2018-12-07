@@ -36,6 +36,16 @@ public class VideoRecorder {
     private String destinationFilename;
     private final AtomicBoolean shouldStopJob = new AtomicBoolean(false);
 
+    /**
+     * If this method fails, stop everything
+     */
+    public static void runSanityCheck() {
+        // Call a method that uses the VideoJNI.
+        // If this fails, it means we do not have access to the native library
+        // It is better to fail fast
+        Rational.make();
+    }
+
     private VideoRecorder(ImageInput imageInput,
                           TimeSource timeSource,
                           VideoRecordingListener videoRecordingListener, long bFragmentationMicros) {
@@ -143,16 +153,16 @@ public class VideoRecorder {
      * very long files (since writing normal MOV/MP4 files stores info about
      * every single packet in memory until the file is closed). The downside
      * is that it is less compatible with other applications.*
-     *
+     * <p>
      * We are going to enable fragmentation, this will write moof/mdat pairs:
      * -movflags frag_keyframe*
-     *
+     * <p>
      * We are going to split the fragment by duration:
      * -frag_duration @var{duration}
      * Create fragments that are @var{duration} microseconds long.*
-     *
+     * <p>
      * To inspect the moov atoms you can use:
-     *  qtfaststart -l recording.mp4
+     * qtfaststart -l recording.mp4
      */
     private static Muxer createMP4MuxerWithFragmentation(String destinationFilename, long fragmentationMicros) {
         Muxer muxer = Muxer.make(destinationFilename, null, "mp4");

@@ -32,6 +32,10 @@ public class ScreenRecorderCliApp {
     }
 
     private void run() throws VideoRecorderException {
+        // Run the sanity check
+        VideoRecorder.runSanityCheck();
+
+        // Process parameters
         if (recordingTime < 0) {
             throw new IllegalArgumentException("Continuous recording not implemented");
         }
