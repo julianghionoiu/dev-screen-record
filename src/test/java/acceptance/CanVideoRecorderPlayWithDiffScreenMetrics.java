@@ -30,7 +30,7 @@ public class CanVideoRecorderPlayWithDiffScreenMetrics {
                     .Builder(imageInput)
                     .build();
             videoRecorder.open("screen_width_is_odd.mp4", 4, 4);
-            videoRecorder.start(Duration.of(5, ChronoUnit.SECONDS));
+            videoRecorder.start(Duration.of(2, ChronoUnit.SECONDS));
 
             videoRecorder.close();
         } catch (Exception ex) {
@@ -48,7 +48,7 @@ public class CanVideoRecorderPlayWithDiffScreenMetrics {
                     .Builder(imageInput)
                     .build();
             videoRecorder.open("screen_height_and_width_are_even.mp4", 4, 4);
-            videoRecorder.start(Duration.of(5, ChronoUnit.SECONDS));
+            videoRecorder.start(Duration.of(2, ChronoUnit.SECONDS));
 
             videoRecorder.close();
         } catch (Exception ex) {
@@ -67,7 +67,7 @@ public class CanVideoRecorderPlayWithDiffScreenMetrics {
                     .Builder(imageInput)
                     .build();
             videoRecorder.open("screen_height_is_odd_adjust_height.mp4", 4, 4);
-            videoRecorder.start(Duration.of(5, ChronoUnit.SECONDS));
+            videoRecorder.start(Duration.of(2, ChronoUnit.SECONDS));
 
             videoRecorder.close();
         } catch (Exception ex) {
