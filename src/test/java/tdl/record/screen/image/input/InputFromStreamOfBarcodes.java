@@ -22,11 +22,22 @@ public class InputFromStreamOfBarcodes implements ImageInput {
     private long systemStartTime;
 
     public InputFromStreamOfBarcodes(BarcodeFormat barcodeFormat, int width, int height, TimeSource timeSource) {
-        this.width = width;
-        this.height = height;
+        this.width = convertToEvenNumber(width);
+        this.height = convertToEvenNumber(height);
         this.barcodeImageRaster = new BarcodeImageRaster(width, height, this.height / 3);
         this.timeSource = timeSource;
         this.barcodeFormat = barcodeFormat;
+    }
+
+    private int convertToEvenNumber(int value) {
+        if (isOdd(value)) {
+            return value - 1;
+        }
+        return value;
+    }
+
+    private boolean isOdd(int value) {
+        return (value % 2) != 0;
     }
 
     @Override
