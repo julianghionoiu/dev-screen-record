@@ -22,4 +22,15 @@ public interface ImageInput {
     int getHeight();
 
     void close();
+
+    default int convertToEvenNumber(int value) {
+        if (isOdd(value)) {
+            return value - 1;
+        }
+        return value;
+    }
+
+    default boolean isOdd(int value) {
+        return (value % 2) != 0;
+    }
 }
