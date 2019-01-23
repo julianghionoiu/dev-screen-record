@@ -3,8 +3,7 @@ package input_from_screen;
 import org.junit.Test;
 import tdl.record.screen.image.input.ImageInput;
 import tdl.record.screen.image.input.InputFromStaticImage;
-import tdl.record.screen.image.input.ScaleToOptimalSizeImage;
-import tdl.record.screen.utils.ImageQualityHint;
+import tdl.record.screen.image.input.InputFromStaticImageWithCustomDimensions;
 import tdl.record.screen.video.VideoRecorder;
 
 import java.time.Duration;
@@ -14,13 +13,20 @@ import static junit.framework.TestCase.fail;
 
 public class CanVideoRecorderPlayWithDiffScreenMetrics {
 
+    private static final int ODD_WIDTH = 3843;
+    private static final int EVEN_HEIGHT = 2160;
+    private static final int EVEN_WIDTH = 3840;
+    private static final int ODD_HEIGHT = 2163;
+
+    private final String referenceImage = "src/test/resources/4k_wallpaper.jpg";
+
     @Test public void
     given_screen_width_is_odd_adjust_width_and_video_should_still_play_fine() {
         try {
-            String referenceImageOddWidth = "src/test/resources/4k_wallpaper_odd_width.jpg";
-            ImageInput imageInput = new ScaleToOptimalSizeImage(
-                    ImageQualityHint.HIGH,
-                    new InputFromStaticImage(referenceImageOddWidth)
+            ImageInput imageInput = new InputFromStaticImageWithCustomDimensions(
+                    new InputFromStaticImage(referenceImage),
+                    ODD_WIDTH,
+                    EVEN_HEIGHT
             );
 
             VideoRecorder videoRecorder = new VideoRecorder
@@ -38,9 +44,10 @@ public class CanVideoRecorderPlayWithDiffScreenMetrics {
     @Test public void
     given_screen_height_and_width_are_even_and_video_should_play_fine() {
         try {
-            String referenceImage = "src/test/resources/4k_wallpaper.jpg";
-            ImageInput imageInput = new ScaleToOptimalSizeImage(
-                    ImageQualityHint.MEDIUM, new InputFromStaticImage(referenceImage)
+            ImageInput imageInput = new InputFromStaticImageWithCustomDimensions(
+                    new InputFromStaticImage(referenceImage),
+                    EVEN_WIDTH,
+                    EVEN_HEIGHT
             );
 
             VideoRecorder videoRecorder = new VideoRecorder
@@ -58,9 +65,10 @@ public class CanVideoRecorderPlayWithDiffScreenMetrics {
     @Test public void
     given_screen_height_is_odd_adjust_height_and_video_should_still_play_fine() {
         try {
-            String referenceImageOddHeight = "src/test/resources/4k_wallpaper_odd_height.jpg";
-            ImageInput imageInput = new ScaleToOptimalSizeImage(
-                    ImageQualityHint.LOW, new InputFromStaticImage(referenceImageOddHeight)
+            ImageInput imageInput = new InputFromStaticImageWithCustomDimensions(
+                    new InputFromStaticImage(referenceImage),
+                    EVEN_WIDTH,
+                    ODD_HEIGHT
             );
 
             VideoRecorder videoRecorder = new VideoRecorder
