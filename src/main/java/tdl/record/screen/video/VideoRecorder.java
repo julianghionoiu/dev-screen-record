@@ -54,15 +54,15 @@ public class VideoRecorder {
         private long bFragmentationMicros;
 
         public Builder(ImageInput imageInput) throws VideoRecorderException {
-            bImageInput = scaleDownDimensionsOf(imageInput);
+            bImageInput = scaleImageToValidWidthAndHeight(imageInput);
             bTimeSource = new SystemTimeSource();
             bVideoRecordingListener = new VideoRecordingMetricsCollector();
             bFragmentationMicros = TimeUnit.MINUTES.toMicros(5);
         }
 
-        private ImageInput scaleDownDimensionsOf(ImageInput imageInput) throws VideoRecorderException {
+        private ImageInput scaleImageToValidWidthAndHeight(ImageInput imageInput) throws VideoRecorderException {
             try {
-                return ScaleToCustomSizeImage.scaleDownDimensionsOf(imageInput);
+                return ScaleToCustomSizeImage.scaleImageToValidWidthAndHeight(imageInput);
             } catch (InputImageGenerationException e) {
                 throw new VideoRecorderException("Could not open input source", e);
             }

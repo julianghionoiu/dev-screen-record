@@ -21,11 +21,11 @@ public class CanVideoRecorderPlayWithDiffScreenMetrics {
     private static final int EVEN_WIDTH = 3840;
     private static final int ODD_HEIGHT = 2159;
 
-    private final String referenceImage = "src/test/resources/4k_wallpaper.jpg";
     private InputFromStaticImage originalImageSource;
 
     @Before
     public void setUp() throws InputImageGenerationException {
+        String referenceImage = "src/test/resources/4k_wallpaper.jpg";
         originalImageSource = new InputFromStaticImage(referenceImage);
         originalImageSource.open();
     }
