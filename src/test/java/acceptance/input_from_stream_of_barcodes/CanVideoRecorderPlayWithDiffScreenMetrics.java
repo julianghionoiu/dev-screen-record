@@ -1,4 +1,4 @@
-package acceptance;
+package acceptance.input_from_stream_of_barcodes;
 
 import com.google.zxing.BarcodeFormat;
 import org.junit.Test;
@@ -55,7 +55,6 @@ public class CanVideoRecorderPlayWithDiffScreenMetrics {
             fail("Video should play perfectly fine, instead threw an exception: " + ex.getMessage());
         }
     }
-
 
     @Test public void
     given_screen_height_is_odd_adjust_height_and_video_should_still_play_fine() {
