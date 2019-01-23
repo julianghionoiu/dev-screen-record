@@ -6,6 +6,7 @@ import io.humble.video.awt.MediaPictureConverterFactory;
 import lombok.extern.slf4j.Slf4j;
 import tdl.record.screen.image.input.ImageInput;
 import tdl.record.screen.image.input.InputImageGenerationException;
+import tdl.record.screen.image.input.ScaleToCustomSizeImage;
 import tdl.record.screen.metrics.VideoRecordingListener;
 import tdl.record.screen.metrics.VideoRecordingMetricsCollector;
 import tdl.record.screen.time.SystemTimeSource;
@@ -52,11 +53,33 @@ public class VideoRecorder {
         private VideoRecordingListener bVideoRecordingListener;
         private long bFragmentationMicros;
 
-        public Builder(ImageInput imageInput) {
-            bImageInput = imageInput;
+        public Builder(ImageInput imageInput) throws VideoRecorderException {
+            bImageInput = adjustDimensionsOf(imageInput);
             bTimeSource = new SystemTimeSource();
             bVideoRecordingListener = new VideoRecordingMetricsCollector();
             bFragmentationMicros = TimeUnit.MINUTES.toMicros(5);
+        }
+
+        private ImageInput adjustDimensionsOf(ImageInput imageInput) throws VideoRecorderException {
+            try {
+                imageInput.open();
+            } catch (InputImageGenerationException e) {
+                throw new VideoRecorderException("Could not open input source", e);
+            }
+            int newHeight = convertToEvenNumber(imageInput.getHeight());
+            int newWidth = convertToEvenNumber(imageInput.getWidth());
+            return new ScaleToCustomSizeImage(imageInput, newWidth, newHeight);
+        }
+
+        private int convertToEvenNumber(int value) {
+            if (isOdd(value)) {
+                return value - 1;
+            }
+            return value;
+        }
+
+        private boolean isOdd(int value) {
+            return (value % 2) != 0;
         }
 
         public Builder withTimeSource(TimeSource timeSource) {

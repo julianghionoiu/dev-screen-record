@@ -13,7 +13,7 @@ public class ScaleToCustomSizeImage implements ImageInput {
 
     private ImageResolution newResolution;
     private BufferedImage targetImage;
-    private AffineTransformOp scaleDownTransform;
+    private AffineTransformOp scaleChangeTransform;
 
 
     public ScaleToCustomSizeImage(ImageInput originalImageSource, int newWidth, int newHeight) {
@@ -34,7 +34,7 @@ public class ScaleToCustomSizeImage implements ImageInput {
             double sy = newResolution.getHeight() / (double) originalInputSource.getHeight();
             AffineTransform at = new AffineTransform();
             at.scale(sx, sy);
-            scaleDownTransform = new AffineTransformOp(at, AffineTransformOp.TYPE_BICUBIC);
+            scaleChangeTransform = new AffineTransformOp(at, AffineTransformOp.TYPE_BICUBIC);
         } else {
             targetImage = new BufferedImage(sourceResolution.getWidth(), sourceResolution.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
         }
@@ -51,8 +51,8 @@ public class ScaleToCustomSizeImage implements ImageInput {
     }
 
     private BufferedImage processImage(BufferedImage originalImage) {
-        if (originalImage.getWidth() * originalImage.getHeight() > newResolution.getNumPixels()) {
-            scaleDownTransform.filter(originalImage, targetImage);
+        if (originalImage.getWidth() * originalImage.getHeight() != newResolution.getNumPixels()) {
+            scaleChangeTransform.filter(originalImage, targetImage);
         } else {
             targetImage = originalImage;
         }
