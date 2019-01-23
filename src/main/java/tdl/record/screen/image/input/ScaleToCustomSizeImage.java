@@ -6,7 +6,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 
-public class InputFromStaticImageWithCustomDimensions implements ImageInput {
+public class ScaleToCustomSizeImage implements ImageInput {
     private final ImageInput originalInputSource;
     private final int newWidth;
     private final int newHeight;
@@ -16,7 +16,7 @@ public class InputFromStaticImageWithCustomDimensions implements ImageInput {
     private AffineTransformOp scaleDownTransform;
 
 
-    public InputFromStaticImageWithCustomDimensions(ImageInput originalImageSource, int newWidth, int newHeight) {
+    public ScaleToCustomSizeImage(ImageInput originalImageSource, int newWidth, int newHeight) {
         this.originalInputSource = originalImageSource;
         this.newWidth = newWidth;
         this.newHeight = newHeight;

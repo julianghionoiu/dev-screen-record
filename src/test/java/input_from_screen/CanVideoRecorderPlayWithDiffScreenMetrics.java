@@ -3,7 +3,7 @@ package input_from_screen;
 import org.junit.Test;
 import tdl.record.screen.image.input.ImageInput;
 import tdl.record.screen.image.input.InputFromStaticImage;
-import tdl.record.screen.image.input.InputFromStaticImageWithCustomDimensions;
+import tdl.record.screen.image.input.ScaleToCustomSizeImage;
 import tdl.record.screen.video.VideoRecorder;
 
 import java.time.Duration;
@@ -23,7 +23,7 @@ public class CanVideoRecorderPlayWithDiffScreenMetrics {
     @Test public void
     given_screen_width_is_odd_adjust_width_and_video_should_still_play_fine() {
         try {
-            ImageInput imageInput = new InputFromStaticImageWithCustomDimensions(
+            ImageInput imageInput = new ScaleToCustomSizeImage(
                     new InputFromStaticImage(referenceImage),
                     ODD_WIDTH,
                     EVEN_HEIGHT
@@ -44,7 +44,7 @@ public class CanVideoRecorderPlayWithDiffScreenMetrics {
     @Test public void
     given_screen_height_and_width_are_even_and_video_should_play_fine() {
         try {
-            ImageInput imageInput = new InputFromStaticImageWithCustomDimensions(
+            ImageInput imageInput = new ScaleToCustomSizeImage(
                     new InputFromStaticImage(referenceImage),
                     EVEN_WIDTH,
                     EVEN_HEIGHT
@@ -65,7 +65,7 @@ public class CanVideoRecorderPlayWithDiffScreenMetrics {
     @Test public void
     given_screen_height_is_odd_adjust_height_and_video_should_still_play_fine() {
         try {
-            ImageInput imageInput = new InputFromStaticImageWithCustomDimensions(
+            ImageInput imageInput = new ScaleToCustomSizeImage(
                     new InputFromStaticImage(referenceImage),
                     EVEN_WIDTH,
                     ODD_HEIGHT
