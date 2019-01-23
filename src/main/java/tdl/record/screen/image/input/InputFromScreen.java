@@ -15,6 +15,15 @@ public class InputFromScreen implements ImageInput {
         this.robot = null;
     }
 
+    public InputFromScreen(Rectangle screenBounds) throws InputImageGenerationException {
+        try {
+            this.robot = new Robot();
+            this.screenBounds = screenBounds;
+        } catch (AWTException e) {
+            throw new InputImageGenerationException(e);
+        }
+    }
+
     @Override
     public void open() throws InputImageGenerationException {
         try {
@@ -25,9 +34,16 @@ public class InputFromScreen implements ImageInput {
                                                    .getDefaultScreenDevice()
                                                    .getDefaultConfiguration()
                                                    .getBounds();
+
+            adjustOddValues(this.screenBounds);
         } catch (AWTException e) {
             throw new InputImageGenerationException(e);
         }
+    }
+
+    private void adjustOddValues(Rectangle screenBounds) {
+        screenBounds.height = convertToEvenNumber(screenBounds.height);
+        screenBounds.width = convertToEvenNumber(screenBounds.width);
     }
 
     @Override
