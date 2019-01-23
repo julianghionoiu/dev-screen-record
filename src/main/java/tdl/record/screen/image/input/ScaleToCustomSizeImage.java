@@ -22,6 +22,28 @@ public class ScaleToCustomSizeImage implements ImageInput {
         this.newHeight = newHeight;
     }
 
+    public static ImageInput scaleDownDimensionsOf(ImageInput imageInput) throws InputImageGenerationException {
+        try {
+            imageInput.open();
+        } catch (InputImageGenerationException e) {
+            throw new InputImageGenerationException(e);
+        }
+        int newHeight = scaleToEvenValue(imageInput.getHeight());
+        int newWidth = scaleToEvenValue(imageInput.getWidth());
+        return new ScaleToCustomSizeImage(imageInput, newWidth, newHeight);
+    }
+
+    private static int scaleToEvenValue(int value) {
+        if (isOdd(value)) {
+            return value - 1;
+        }
+        return value;
+    }
+
+    private static boolean isOdd(int value) {
+        return (value % 2) != 0;
+    }
+
     @Override
     public void open() throws InputImageGenerationException {
         originalInputSource.open();
