@@ -35,15 +35,9 @@ public class InputFromScreen implements ImageInput {
                                                    .getDefaultConfiguration()
                                                    .getBounds();
 
-            adjustOddValues(this.screenBounds);
         } catch (AWTException e) {
             throw new InputImageGenerationException(e);
         }
-    }
-
-    private void adjustOddValues(Rectangle screenBounds) {
-        screenBounds.height = convertToEvenNumber(screenBounds.height);
-        screenBounds.width = convertToEvenNumber(screenBounds.width);
     }
 
     @Override
