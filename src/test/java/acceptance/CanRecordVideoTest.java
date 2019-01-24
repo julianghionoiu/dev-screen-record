@@ -54,7 +54,7 @@ public class CanRecordVideoTest {
 
     @Test
     @Ignore("Manual acceptance")
-    public void multiple_screens() throws Exception {
+    public void multiple_screens() {
         //TODO Try the recording when you have multiple screens
     }
 
@@ -142,6 +142,29 @@ public class CanRecordVideoTest {
         videoPlayer.close();
     }
 
+    @Test
+    public void odd_width_and_height_should_be_made_even() throws Exception {
+        String referenceImage = "src/test/resources/odd_width_and_height.jpg";
+        String destinationVideoFile = "build/recording_from_odd_width_and_height.mp4";
+
+        ImageInput imageInput = new ScaleToOptimalSizeImage(ImageQualityHint.LOW,
+                new InputFromStaticImage(referenceImage));
+        VideoRecordingListener metrics = new VideoRecordingMetricsCollector();
+
+        VideoRecorder videoRecorder = new VideoRecorder.Builder(imageInput)
+                .withTimeSource(new SystemTimeSource())
+                .withRecordingListener(metrics)
+                .build();
+        videoRecorder.open(destinationVideoFile, 10, 4);
+        videoRecorder.start(Duration.of(1, ChronoUnit.SECONDS));
+        videoRecorder.close();
+
+        VideoPlayer videoPlayer = new VideoPlayer(new OutputToInMemoryBuffer());
+        videoPlayer.open(destinationVideoFile);
+        assertThat(videoPlayer.getWidth(), is(300));
+        assertThat(videoPlayer.getHeight(), is(200));
+        videoPlayer.close();
+    }
 
     /**
      * Frame rate sampling. On large desktops, taking a screenshot could take a lot of time.
@@ -224,7 +247,7 @@ public class CanRecordVideoTest {
      */
     @Test
     @Ignore("Not implemented")
-    public void video_should_be_broken_down_into_discrete_packets_to_help_with_upload() throws Exception {
+    public void video_should_be_broken_down_into_discrete_packets_to_help_with_upload() {
         //TODO Generate video, truncate some bytes at the end, assert that the video is still valid
     }
 
@@ -234,13 +257,13 @@ public class CanRecordVideoTest {
      */
     @Test
     @Ignore("Not implemented")
-    public void display_processing_feedback_to_the_console() throws Exception {
+    public void display_processing_feedback_to_the_console() {
         //TODO Add a test for data collection
     }
 
     @Test
     @Ignore("Not implemented")
-    public void can_be_run_as_cli_tool() throws Exception {
+    public void can_be_run_as_cli_tool() {
         //TODO Add a test for the CLI tool that starts a recording
     }
 

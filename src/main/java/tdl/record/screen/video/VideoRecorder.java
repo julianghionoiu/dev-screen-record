@@ -4,6 +4,7 @@ import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
 import lombok.extern.slf4j.Slf4j;
+import tdl.record.screen.image.input.EnsureEvenHeightAndWidth;
 import tdl.record.screen.image.input.ImageInput;
 import tdl.record.screen.image.input.InputImageGenerationException;
 import tdl.record.screen.metrics.VideoRecordingListener;
@@ -49,7 +50,7 @@ public class VideoRecorder {
     private VideoRecorder(ImageInput imageInput,
                           TimeSource timeSource,
                           VideoRecordingListener videoRecordingListener, long bFragmentationMicros) {
-        this.imageInput = imageInput;
+        this.imageInput = new EnsureEvenHeightAndWidth(imageInput);
         this.timeSource = timeSource;
         this.videoRecordingListener = videoRecordingListener;
         this.fragmentationMicros = bFragmentationMicros;
