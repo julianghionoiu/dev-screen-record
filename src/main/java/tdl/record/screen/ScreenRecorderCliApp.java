@@ -10,10 +10,12 @@ import tdl.record.screen.utils.ImageQualityHint;
 import tdl.record.screen.video.VideoRecorder;
 import tdl.record.screen.video.VideoRecorderException;
 
+import java.awt.*;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Scanner;
 
 @Slf4j
 public class ScreenRecorderCliApp {
@@ -40,9 +42,25 @@ public class ScreenRecorderCliApp {
             throw new IllegalArgumentException("Continuous recording not implemented");
         }
 
+        // Choose screen in case multiple displays are available
+        GraphicsDevice[] screenDevices = GraphicsEnvironment.getLocalGraphicsEnvironment().getScreenDevices();
+        GraphicsDevice screenDeviceToRecord;
+        if (screenDevices.length == 1) {
+            screenDeviceToRecord = screenDevices[0];
+        } else if (screenDevices.length > 1) {
+            int selectedScreenNumber = askUserToSelectScreen(screenDevices);
+            screenDeviceToRecord = screenDevices[selectedScreenNumber];
+        } else {
+            throw new IllegalArgumentException("No screen devices found");
+        }
+        Rectangle screenBounds = screenDeviceToRecord.getDefaultConfiguration().getBounds();
+        log.info("Recording screen size: " + screenBounds.width + "x" + screenBounds.height);
+
+        InputFromScreen originalImageSource = new InputFromScreen(screenDeviceToRecord);
+
         VideoRecordingMetricsCollector videoRecordingMetricsCollector = new VideoRecordingMetricsCollector();
         VideoRecorder videoRecorder = new VideoRecorder
-                .Builder(new ScaleToOptimalSizeImage(ImageQualityHint.MEDIUM, new InputFromScreen()))
+                .Builder(new ScaleToOptimalSizeImage(ImageQualityHint.MEDIUM, originalImageSource))
                 .withRecordingListener(videoRecordingMetricsCollector)
                 .build();
 
@@ -64,6 +82,38 @@ public class ScreenRecorderCliApp {
         videoRecorder.start(Duration.of(recordingTime, ChronoUnit.MINUTES));
         videoRecorder.close();
         timer.cancel();
+    }
+
+    private int askUserToSelectScreen(GraphicsDevice[] screenDevices) {
+        Scanner scan = new Scanner(System.in);
+
+        System.out.println("Multiple displays detected:");
+        for (int i = 0; i < screenDevices.length; i++) {
+            GraphicsDevice screenDevice = screenDevices[i];
+            Rectangle bounds = screenDevice.getDefaultConfiguration().getBounds();
+            System.out.println("Screen "+ (i+1) + " - "+bounds.width + "x" +bounds.height);
+        }
+
+        boolean askForInput = true;
+        int selection = 0;
+        do {
+            try {
+                System.out.print("Please choose the screen you wish to record. Type the screen number: ");
+                String userInput = scan.next();
+                selection = Integer.parseInt(userInput) - 1;
+
+                if (selection >= 0 && selection < screenDevices.length) {
+                    askForInput = false;
+                } else {
+                    System.out.println("Input out of bounds");
+                }
+            } catch (NumberFormatException e) {
+                System.out.println("Input is not a valid number");
+                askForInput = true;
+            }
+        } while (askForInput);
+
+        return selection;
     }
 
 

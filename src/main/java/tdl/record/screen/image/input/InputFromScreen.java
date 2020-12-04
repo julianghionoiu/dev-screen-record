@@ -9,10 +9,16 @@ public class InputFromScreen implements ImageInput {
     private static final int IMAGE_TYPE = BufferedImage.TYPE_3BYTE_BGR;
     private Rectangle screenBounds;
     private Robot robot;
+    private GraphicsDevice screenDevice;
 
     public InputFromScreen() {
+        this(GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice());
+    }
+
+    public InputFromScreen(GraphicsDevice screenDevice) {
         this.screenBounds = null;
         this.robot = null;
+        this.screenDevice = screenDevice;
     }
 
     @Override
@@ -20,11 +26,8 @@ public class InputFromScreen implements ImageInput {
         try {
             //OBS: Robot requires AWTPermission, it might be wise to use a policy file, see http://docs.oracle.com/javase/7/docs/technotes/guides/security/PolicyFiles.html
             //OBS: Robot starts an app called AppMain. What is the deal with it ?
-            this.robot = new Robot();
-            this.screenBounds = GraphicsEnvironment.getLocalGraphicsEnvironment()
-                                                   .getDefaultScreenDevice()
-                                                   .getDefaultConfiguration()
-                                                   .getBounds();
+            this.robot = new Robot(screenDevice);
+            this.screenBounds = screenDevice.getDefaultConfiguration().getBounds();
         } catch (AWTException e) {
             throw new InputImageGenerationException(e);
         }

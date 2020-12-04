@@ -103,7 +103,7 @@ This will create a maven based Jar that will download the required dependencies 
 ```
 ./gradlew mavenCapsule
 java -Dlogback.configurationFile=`pwd`/logback.xml \
-    -jar ./build/libs/dev-screen-record-1.0-SNAPSHOT-capsule.jar --duration 1 --output ./recording.mp4
+    -jar ./build/libs/dev-screen-record-0.0.10-SNAPSHOT-capsule.jar --duration 1 --output ./recording.mp4
 ```
 
 ### Install to mavenLocal
