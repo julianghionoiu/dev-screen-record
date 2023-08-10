@@ -134,4 +134,4 @@ To promote to the Live repo, do the following:
 - "Release" the repo
 - wait between 15 mins and up to 2 hours for the new version to appear in Central
 - first check the Web UI: https://oss.sonatype.org/#view-repositories;releases~browsestorage
-- then check: https://repo1.maven.org/maven2/ro/ghionoiu/dev-sourcecode-record/
+- then check: https://repo1.maven.org/maven2/ro/ghionoiu/dev-screen-record/
