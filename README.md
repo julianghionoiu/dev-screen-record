@@ -98,11 +98,11 @@ You do this by registering `shutdownHook`:
 
 ### Build and run as command-line app
 
-This will create a maven based Jar that will download the required dependencies before running the app:
+This will create a Jar file with the platform specific video library embedded
 ```
-./gradlew mavenCapsule
+./gradlew build shadowJar -i -PvideoArch=macos
 java -Dlogback.configurationFile=`pwd`/logback.xml \
-    -jar ./build/libs/dev-screen-record-0.0.10-SNAPSHOT-capsule.jar --duration 1 --output ./recording.mp4
+    -jar ./build/libs/dev-screen-record-macos-all.jar --duration 1 --output ./recording.mp4
 ```
 
 ### Install to mavenLocal

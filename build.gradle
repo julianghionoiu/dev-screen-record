@@ -60,7 +60,7 @@ dependencies {
     // Add the OS specific binaries
     if (humbleVideoBundleName != "unset") {
         println 'Native video library humble-video '+humbleVideoBundleName+' - '+humbleVideoVersion+' will be bundled with the jar'
-        compile 'io.humble:humble-video-arch-'+humbleVideoBundleName+':'+humbleVideoVersion
+        implementation 'io.humble:humble-video-arch-'+humbleVideoBundleName+':'+humbleVideoVersion
         archivesBaseName = archivesBaseName + "-" + videoArch
     }
 
@@ -96,6 +96,15 @@ javadoc {
     options.addStringOption('Xdoclint:none', '-quiet')
 }
 
+shadowJar {
+    manifest {
+        attributes 'Main-Class': "$mainClassName"
+        attributes 'Humble-Native-Paths': "."
+        attributes 'Humble-Native-Bundles': "$humbleVideoBundleName"
+        attributes 'Humble-Native-App': "humble-video"
+        attributes 'Humble-Native-Root': "."
+    }
+}
 
 // Refs:
 // https://stackoverflow.com/a/68505768
