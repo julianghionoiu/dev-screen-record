@@ -1,10 +1,11 @@
 package acceptance;
 
 import com.google.zxing.BarcodeFormat;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+
 import tdl.record.screen.image.input.ImageInput;
 import tdl.record.screen.image.input.InputFromErrorProneSource;
 import tdl.record.screen.image.input.InputFromFreezingSource;
@@ -30,18 +31,18 @@ public class CanHandleFailuresTest {
 
     private ExecutorService executor;
 
-    @Before
-    public void setUp() throws Exception {
+    @BeforeEach
+    public void setUp() {
         executor = Executors.newSingleThreadExecutor();
     }
 
-    @After
-    public void tearDown() throws Exception {
+    @AfterEach
+    public void tearDown() {
         executor.shutdownNow();
     }
 
     @Test
-    @Ignore("DEBT Investigate why this test fails on the CI")
+    @Disabled("DEBT Investigate why this test fails on the CI")
     public void recorded_file_should_be_recoverable_after_sigkill() throws Exception {
         String destinationVideo = "build/recording_interrupted_by_sigkill.mp4";
         TimeSource recordTimeSource = new FakeTimeSource();

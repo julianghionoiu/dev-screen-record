@@ -1,7 +1,7 @@
 package acceptance;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import tdl.record.screen.image.output.OutputToScreen;
 import tdl.record.screen.video.VideoPlayer;
 
@@ -10,7 +10,7 @@ import java.util.concurrent.TimeUnit;
 public class CanPlayVideoTest {
 
     @Test
-    @Ignore("Manual acceptance")
+    @Disabled("Manual acceptance")
     public void play_recorded_video() throws Exception {
         VideoPlayer videoPlayer = new VideoPlayer(new OutputToScreen());
 

@@ -3,7 +3,8 @@ package tdl.record.screen.video;
 import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tdl.record.screen.image.input.EnsureEvenHeightAndWidth;
 import tdl.record.screen.image.input.ImageInput;
 import tdl.record.screen.image.input.InputImageGenerationException;
@@ -23,8 +24,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.nio.file.StandardOpenOption.CREATE;
 
-@Slf4j
 public class VideoRecorder {
+    private static final Logger log = LoggerFactory.getLogger(VideoRecorder.class);
     private final ImageInput imageInput;
     private final TimeSource timeSource;
     private final VideoRecordingListener videoRecordingListener;

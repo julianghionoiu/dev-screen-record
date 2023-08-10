@@ -1,14 +1,15 @@
 package tdl.record.screen.metrics;
 
 import io.humble.video.Rational;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.TimeUnit;
 
-@Slf4j
 public class VideoRecordingMetricsCollector implements VideoRecordingListener {
+    private static final Logger log = LoggerFactory.getLogger(VideoRecordingMetricsCollector.class);
     private long expectedTimeBetweenFramesNanos;
     private long timestampBeforeProcessingNanos;
     private double renderingTimeRatio;

@@ -2,7 +2,8 @@ package tdl.record.screen;
 
 import com.beust.jcommander.JCommander;
 import com.beust.jcommander.Parameter;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tdl.record.screen.image.input.InputFromScreen;
 import tdl.record.screen.image.input.ScaleToOptimalSizeImage;
 import tdl.record.screen.metrics.VideoRecordingMetricsCollector;
@@ -17,8 +18,9 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Scanner;
 
-@Slf4j
 public class ScreenRecorderCliApp {
+    private static final Logger log = LoggerFactory.getLogger(ScreenRecorderCliApp.class);
+
     @Parameter(names = {"-o", "--output"}, description = "The path to the recording file")
     private String destinationPath = "./recording.mp4";
 

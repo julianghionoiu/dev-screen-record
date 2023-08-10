@@ -4,8 +4,8 @@ import com.google.zxing.BarcodeFormat;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import tdl.record.screen.image.input.*;
 import tdl.record.screen.image.output.OutputToBarcodeReader;
 import tdl.record.screen.image.output.OutputToInMemoryBuffer;
@@ -34,13 +34,13 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.greaterThan;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CanRecordVideoTest {
 
     @Test
-    @Ignore("Manual acceptance")
+    @Disabled("Manual acceptance")
     public void record_screen_at_4x() throws Exception {
         VideoRecorder videoRecorder = new VideoRecorder
                 .Builder(new ScaleToOptimalSizeImage(ImageQualityHint.HIGH, new InputFromScreen()))
@@ -53,7 +53,7 @@ public class CanRecordVideoTest {
     }
 
     @Test
-    @Ignore("Manual acceptance")
+    @Disabled("Manual acceptance")
     public void multiple_screens() {
         //TODO Try the recording when you have multiple screens
     }
@@ -246,7 +246,7 @@ public class CanRecordVideoTest {
      * Packets produced: The video should be broken down in discrete packets to make upload easier. (write every X min)
      */
     @Test
-    @Ignore("Not implemented")
+    @Disabled("Not implemented")
     public void video_should_be_broken_down_into_discrete_packets_to_help_with_upload() {
         //TODO Generate video, truncate some bytes at the end, assert that the video is still valid
     }
@@ -256,13 +256,13 @@ public class CanRecordVideoTest {
      * UX: feedback should be collected and displayed on the console ( recording status, size generated, growth rate, size available )
      */
     @Test
-    @Ignore("Not implemented")
+    @Disabled("Not implemented")
     public void display_processing_feedback_to_the_console() {
         //TODO Add a test for data collection
     }
 
     @Test
-    @Ignore("Not implemented")
+    @Disabled("Not implemented")
     public void can_be_run_as_cli_tool() {
         //TODO Add a test for the CLI tool that starts a recording
     }

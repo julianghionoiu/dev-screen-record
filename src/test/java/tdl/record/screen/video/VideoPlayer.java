@@ -3,7 +3,8 @@ package tdl.record.screen.video;
 import io.humble.video.*;
 import io.humble.video.awt.MediaPictureConverter;
 import io.humble.video.awt.MediaPictureConverterFactory;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import tdl.record.screen.image.output.ImageOutput;
 import tdl.record.screen.image.output.ImageOutputException;
 import tdl.record.screen.time.SystemTimeSource;
@@ -16,8 +17,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-@Slf4j
 public class VideoPlayer {
+    private static final Logger log = LoggerFactory.getLogger(VideoPlayer.class);
     private final ImageOutput imageOutput;
     private final TimeSource timeSource;
     private Demuxer demuxer;

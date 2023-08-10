@@ -1,17 +1,17 @@
 package tdl.record.screen.utils;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.closeTo;
 import static org.hamcrest.Matchers.lessThan;
-import static org.junit.Assert.assertThat;
 
 public class ImageResolutionPickerTest {
 
 
     @Test
-    public void should_honour_quality_hints() throws Exception {
+    public void should_honour_quality_hints() {
         double ratio = 4 / 3D;
 
         ImageResolution low = ImageResolutionPicker.maxResolutionFor(ratio, ImageQualityHint.LOW);
@@ -21,7 +21,7 @@ public class ImageResolutionPickerTest {
     }
 
     @Test
-    public void should_honour_ratios() throws Exception {
+    public void should_honour_ratios() {
         ImageQualityHint hint = ImageQualityHint.MEDIUM;
         ImageResolution image = ImageResolutionPicker.maxResolutionFor(4 / 3D, hint);
 
@@ -29,7 +29,7 @@ public class ImageResolutionPickerTest {
     }
 
     @Test
-    public void should_only_work_for_supported_ratios() throws Exception {
+    public void should_only_work_for_supported_ratios() {
         assertThat(ImageResolutionPicker.canSupport(1/1D), is(false));
         assertThat(ImageResolutionPicker.canSupport(4/3D), is(true));
     }
