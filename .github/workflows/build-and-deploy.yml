@@ -17,12 +17,13 @@ jobs:
         run: java -version
       - name: Test
         run: |
-          ./gradlew clean build test -i
+          ./gradlew clean build test -PvideoArch=linux -i
       - name: Build Application JAR
         run: |
-          ./gradlew shadowJar -PvideoArch=macos -x test 
-          ./gradlew shadowJar -PvideoArch=linux -x test 
-          ./gradlew shadowJar -PvideoArch=windows -x test
+          ./gradlew clean
+          ./gradlew build shadowJar -PvideoArch=macos -x test 
+          ./gradlew build shadowJar -PvideoArch=linux -x test 
+          ./gradlew build shadowJar -PvideoArch=windows -x test
       - name: Archive Binary
         uses: actions/upload-artifact@v3
         with:
