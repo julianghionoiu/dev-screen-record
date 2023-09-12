@@ -135,3 +135,13 @@ To promote to the Live repo, do the following:
 - wait between 15 mins and up to 2 hours for the new version to appear in Central
 - first check the Web UI: https://oss.sonatype.org/#view-repositories;releases~browsestorage
 - then check: https://repo1.maven.org/maven2/ro/ghionoiu/dev-screen-record/
+
+### To build artifacts in Github
+
+Commit all changes then:
+```bash
+export RELEASE_TAG="v$(cat gradle.properties | cut -d= -f2)"
+git tag -a "${RELEASE_TAG}" -m "${RELEASE_TAG}"
+git push --tags
+git push
+```
