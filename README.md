@@ -115,7 +115,11 @@ If you want to build the SNAPSHOT version locally you can install to the local M
 #### JUnit tests
 
 ```bash
+# Run the headless tests
 ./gradlew clean test -i
+
+# To run tests that need a screen
+./gradlew screenTests -i
 ```
 
 ### Publish to Maven Central

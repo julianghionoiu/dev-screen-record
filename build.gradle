@@ -72,12 +72,23 @@ dependencies {
 }
 
 test {
-    useJUnitPlatform()
-    systemProperty("cucumber.junit-platform.naming-strategy", "long")
+    useJUnitPlatform {
+        excludeTags 'needs_screen'
+    }
     testLogging {
         events "passed", "skipped", "failed"
     }
 }
+
+tasks.register('screenTests', Test) {
+    useJUnitPlatform {
+        includeTags 'needs_screen'
+    }
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
 
 mainClassName = "tdl.record.screen.ScreenRecorderCliApp"
 jar {

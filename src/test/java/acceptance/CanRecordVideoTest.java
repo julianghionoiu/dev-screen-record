@@ -5,6 +5,7 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
 import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import tdl.record.screen.image.input.*;
 import tdl.record.screen.image.output.OutputToBarcodeReader;
@@ -170,6 +171,7 @@ public class CanRecordVideoTest {
      * Frame rate sampling. On large desktops, taking a screenshot could take a lot of time.
      */
     @Test
+    @Tag("needs_screen")
     public void test_measure_recording_performance() throws Exception {
         //Record first video
         int lowRateSnapsPerSecond = 2;
